@@ -1,0 +1,74 @@
+<html>
+    <head>
+        <title>DOM MOBILE</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <script src="../lib/jquery.min.js"></script>
+          <script src="../lib/DOM.js"></script>
+          <style>
+              
+              #test{
+                  background: red;
+                  padding: 50px;
+                  position: absolute;
+                  margin: 50px;
+                  cursor: pointer;
+              }
+              </style>
+    </head>
+    <body>
+        Vitesse X
+          <div id="vitesseX">
+            0
+            
+        </div>
+         Vitesse Y
+         <div id="vitesseY">
+            0
+            
+        </div>
+        <div id="direction">
+            0
+            
+        </div>
+        
+        <div id="test" onMousedown="dragAndDrop(event)">
+            test
+            
+        </div>
+        
+       <script>
+
+        DOM.selection(false);
+         var moveX=function(e){
+             function callback(dom){
+                 console.log("moveXend");
+                 $("#vitesseX").html(dom.vitesse.x);
+        
+             }
+             DOM.move($("#test"),"x",1,callback);
+             $("#direction").html("moveX");
+           
+         } 
+         var moveY=function(e){
+             
+            function callback(dom){
+                 console.log("moveYend");
+                 $("#vitesseY").html(dom.vitesse.y);
+             }
+            
+             DOM.move($("#test"),"y",1,callback);
+               $("#direction").html("moveY");
+         }
+          function dragAndDrop(e){
+              console.log("click");
+               DOM.direction(e,function(movement){
+                      var direction=Math.abs(movement.x)>Math.abs(movement.y);
+                      console.log(direction);
+                      direction?moveX():moveY();
+                  },function(){console.log("cancel");});
+            };
+        
+        </script>
+    </body>
+</html>
