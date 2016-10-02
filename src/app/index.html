@@ -14,6 +14,14 @@
                   margin: 50px;
                   cursor: pointer;
               }
+              #test2{
+                  
+                     background: white;
+                  padding: 50px;
+                  border:solid 1px;
+                 
+                  cursor: pointer;
+              }
               </style>
     </head>
     <body>
@@ -31,15 +39,48 @@
             0
             
         </div>
-        
-        <div id="test" onMousedown="dragAndDrop(event)">
-            test
+           <div id="test2" onMousedown="longclick(event)">
+            LONGCLICK
             
         </div>
-        
+        <div id="test" onMousedown="dragAndDrop(event)">
+            MOTION TARGET
+            
+        </div>
+       
        <script>
 
+
+
+
         DOM.selection(false);
+        var longclick=function(e){
+            
+             $(e.target).css({"background":"white"});
+             
+             var cancel=function(e){
+                   $(e.target).css({"background":"white"});
+            } 
+            
+            
+            var callback=function(e){
+                
+               
+               if(e.etat=="click"){
+                   $(e.target).css({"background":"blue"});
+                   
+               }
+               if(e.etat=="longclick"){
+                    $(e.target).css({"background":"red"});
+               }
+               if(e.etat=="longclickend"){
+                    $(e.target).css({"background":"white"});
+               }
+               
+            }
+            DOM.onlongclick(e,callback,cancel)
+        }
+        
          var moveX=function(e){
              function callback(dom){
                  console.log("moveXend");
@@ -62,7 +103,7 @@
          }
           function dragAndDrop(e){
               console.log("click");
-               DOM.direction(e,function(movement){
+               DOM.findYourWay(e,function(movement){
                       var direction=Math.abs(movement.x)>Math.abs(movement.y);
                       console.log(direction);
                       direction?moveX():moveY();

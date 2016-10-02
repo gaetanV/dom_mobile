@@ -8,7 +8,6 @@ var DOM;
             fps:30,
             timeDirection:30, //@Time to determinate where you go
             timeLongclick:600,//@Time to determinate when is a longClick
-            
         }
         var mem={
             window:{x:$( window ).width(),y:$( window ).height()},
@@ -17,23 +16,19 @@ var DOM;
         var getTime= function(){
             return +mem.time;
         };
-        var movestate=[false,];
-        ///////////
-        //@DOM KERNEL
-        ///////////
         var dom={
             move:false, 
             /* 
-                @mousemove :  switch move [dragAndDrop,direction]
+                @mousemove :  switch move [dragAndDrop,FindYourWay,longclick]
             */
             click:false,
             /* 
                 @EVENT     : REGISTER.onlongclick
                 @refresh   : Defined if move is longclick
             */
-            direction:false,
+            FindYourWay:false,
             /*
-                @EVENT     : REGISTER.direction
+                @EVENT     : REGISTER.FindYourWay
                 @mousemove : defined position
             */
             dragAndDrop:false, 
@@ -47,6 +42,9 @@ var DOM;
         }
 
         var REFRESH=function(){
+            var time=function(){
+                  mem.time+=param.fps;
+            }
             var  dragAndDrop=function(){
                 var dm=dom.dragAndDrop;
                 if(dm.refresh){
@@ -64,26 +62,24 @@ var DOM;
             var longClick=function(){
                 if(dom.click&&dom.click.etat=="click"){
                     if(getTime()>dom.click.start+param.timeLongclick){
-                          
-                           dom.click.etat="longclick";
-                           dom.click.callback(dom.click);
-                           
+                           REGISTER.startLongClick();      
                     }
                 }
             }
             return {
                 longClick:longClick,
-                dragAndDrop:dragAndDrop
+                dragAndDrop:dragAndDrop,
+                time:time
             }
         }();
+        
         var EVENT=function(){
             //@FRAME REFRESH 
             var refresh = function(){ 
-                mem.time+=param.fps;
+                REFRESH.time();
                 REFRESH.longClick();
                 REFRESH.dragAndDrop();
             }
-            
             var resize=function(){
                  var w={x:$(window).width(),y:$(window).height()};
                 //@OPTI RESIZE X
@@ -93,33 +89,34 @@ var DOM;
                 }
             }
             var mousemove=function(e){  
-                //@Determinate where you go , nothing append
-                var whereYouGo=function(e){
-                    var d=dom.direction;
+                 var whereYouGo=function(e){
+                    var d=dom.FindYourWay;
                     if(getTime()>d.timeStart+param.timeDirection){
                         var distance=Math.abs(e.clientX-d.mouseStart.x)+Math.abs(e.clientY-d.mouseStart.y);
                         if(distance>4){
-                            d.callback({x:e.clientX-d.mouseStart.x,y:e.clientY-d.mouseStart.y});
-                            dom.direction=false; 
+                            if(dom.click){
+                                dom.click.cancel(dom.click);
+                                dom.click=false;
+                            }
+                            REGISTER.stopFindYourWay(e);
                         }
                     }
                 }
-                //@On move
                 var dragAndDrop=function(e){
-                    var domObject=dom.dragAndDrop;
-                    if(!domObject.mouse){domObject.mouse={x:e.clientX,y:e.clientY}}
-                    switch(domObject.way){  
-                        case "x":
-                            var x=domObject.posStart.x+domObject.mouse.x-e.clientX;  
-                            domObject.refresh=true;
-                            domObject.posEnd={x:x,y:domObject.posStart.y}
-                            break;
-                        case "y":
-                            var y=domObject.posStart.y+(domObject.mouse.y-e.clientY)*domObject.speed;  
-                            domObject.refresh=true;
-                            domObject.posEnd={y:y,x:domObject.posStart.x}
-                            break;
-                    }   
+                        var domObject=dom.dragAndDrop;
+                        if(!domObject.mouse){domObject.mouse={x:e.clientX,y:e.clientY}}
+                        switch(domObject.way){  
+                            case "x":
+                                var x=domObject.posStart.x+domObject.mouse.x-e.clientX;  
+                                domObject.refresh=true;
+                                domObject.posEnd={x:x,y:domObject.posStart.y}
+                                break;
+                            case "y":
+                                var y=domObject.posStart.y+(domObject.mouse.y-e.clientY)*domObject.speed;  
+                                domObject.refresh=true;
+                                domObject.posEnd={y:y,x:domObject.posStart.x}
+                                break;
+                        }   
                }
                switch(dom.move){
                    case "whereYouGo":
@@ -128,41 +125,25 @@ var DOM;
                    case "dragAndDrop":
                        dragAndDrop(e);
                        break;
+                   case "longclick": 
+                       break;
                }
-               //dom.direction?whereYouGo(e):dragAndDrop(e);  
             }
             var mousewheel=function(e){
-               
                 for(var i in dom.scroll){dom.scroll[i](e.detail>0);};
             }
             var mouseup=function(e){
-               
-                dom.move=false;
                 if(dom.click){
-            
-                      if(dom.click.etat=="longclick"){dom.click.etat="longclickend"};
-                      dom.click.callback(dom.click)
-               
+                    if(dom.click.etat=="longclick"){
+                        REGISTER.stopLongClick();
+                    }else{
+                        REGISTER.stopClick();
+                    }
                 };
-                dom.click=false;
-                 
-                if(dom.direction){dom.direction.error();dom.direction=false;}
-                
-                
-                var domObj=dom.dragAndDrop;
-                if(domObj){
-                    domObj.timeEnd=getTime(); 
-                    var time=domObj.timeEnd-domObj.timeStart;
-                    var x= Math.abs(domObj.posStart.x-domObj.posEnd.x);
-                    var y= Math.abs(domObj.posStart.y-domObj.posEnd.y);
-                    domObj.vitesse={x:1/(time*1/x),y:1/(time*1/y)}; 
-                    domObj.callback(domObj);
-                    REGISTER.stopDragAndDrop();
-                 
-                    //selection(true);
-                }
-
+                if(dom.FindYourWay){REGISTER.cancelFindYourWay();}
+                if(dom.dragAndDrop){REGISTER.stopDragAndDrop();}
             }
+            
             return{
                 resize:resize,
                 mousemove:mousemove,
@@ -172,18 +153,53 @@ var DOM;
             }
         }();
         var REGISTER=function(){
-            var stopDragAndDrop =function(){ var domObj=dom.dragAndDrop; dom.dragAndDrop=false;}
-           var startFindYourWay=function(e,callback,error){
-                dom.move="whereYouGo";
-                dom.direction={
+
+            var startClick = function (e,callback,cancel){   
+                dom.click={
+                    start:getTime(),
                     callback:callback,
-                    error:error,
+                    cancel:cancel,
+                    target:e.target,
+                    etat:"click"
+                };
+            }
+            var stopClick=function(){
+               dom.move=false;
+               dom.click.callback(dom.click)
+               dom.click=false;
+            }
+            var startLongClick =function(){
+               dom.move="longclick";
+               dom.click.etat="longclick";
+               dom.click.callback(dom.click);
+            }
+            var stopLongClick =function(){
+               dom.move=false;
+               dom.click.etat="longclickend";
+               dom.click.callback(dom.click);
+               dom.click=false;
+            } 
+
+            var startFindYourWay=function(e,callback,cancel){
+                dom.move="whereYouGo";
+                dom.FindYourWay={
+                    callback:callback,
+                    cancel:cancel,
                     mouseStart:{x:e.clientX,y:e.clientY},
                     timeStart:getTime()
                 }
             }
-            var move=function(domNode,way,speed,callback){
-           
+            var stopFindYourWay=function(e){
+               dom.move=false;
+               dom.FindYourWay.callback({x:e.clientX-dom.FindYourWay.mouseStart.x,y:e.clientY-dom.FindYourWay.mouseStart.y});
+               dom.FindYourWay=false; 
+            }
+            var cancelFindYourWay=function(){
+               dom.move=false;
+               dom.FindYourWay.cancel();
+               dom.FindYourWay=false;
+            }
+            var startDragAndDrop=function(domNode,way,speed,callback){
                 dom.move="dragAndDrop";
                 var position = domNode.position();
                 dom.dragAndDrop&&(stopDragAndDrop());
@@ -199,38 +215,34 @@ var DOM;
                     callback:callback,
                     refresh:false,
                 };
-                dom.click=false;
                 window.getSelection().removeAllRanges();
                 //selection(false);
-               }
-               function onlongclick(e,callback)
-               {   
-                    if(!dom.click){
-                         dom.click={
-                            start:getTime(),
-                            callback:callback,
-                            target:e.target,
-                            etat:"click"
-                         };
-                    }
-                   
-                   /* 
-                   if(dom.click)return false;
-                   return dom.click;
-                   window.getSelection().removeAllRanges();
-                   console.log(window.getSelection().toString());
-                   */
-              }
-
-              return{
-                  move:move,
-                  onresize:function(space,id,callback){ if(dom.resize[space]){dom.resize[space][id]=callback;}},
-                  onmousewheel:function(id,callback){dom.scroll[id]=callback;} ,
-                  onlongclick:onlongclick,
+            }
+            
+            var stopDragAndDrop =function(){ 
+                dom.move=false;
+                var domObj=dom.dragAndDrop;
+                domObj.timeEnd=getTime(); 
+                var time=domObj.timeEnd-domObj.timeStart;
+                var x= Math.abs(domObj.posStart.x-domObj.posEnd.x);
+                var y= Math.abs(domObj.posStart.y-domObj.posEnd.y);
+                domObj.vitesse={x:1/(time*1/x),y:1/(time*1/y)}; 
+                domObj.callback(domObj);
+                dom.dragAndDrop=false;
+            }
+            return{
+                  startDragAndDrop:startDragAndDrop,
+                  stopDragAndDrop:stopDragAndDrop,
+                  startClick:startClick,
+                  stopClick:stopClick,
+                  startLongClick:startLongClick,
+                  stopLongClick:stopLongClick,
                   startFindYourWay:startFindYourWay,
-                  stopDragAndDrop:stopDragAndDrop
-              }
-              
+                  stopFindYourWay:stopFindYourWay,
+                  cancelFindYourWay:cancelFindYourWay,
+                  onresize:function(space,id,callback){ if(dom.resize[space]){dom.resize[space][id]=callback;}}, 
+                  onmousewheel:function(id,callback){dom.scroll[id]=callback;} ,
+            } 
         }();
          var TOOLS=function(){
               var selection=function(boolean){
@@ -274,10 +286,9 @@ var DOM;
         $(document).bind('mouseleave.dragged', EVENT.mouseup);
        
         return({
-             move:REGISTER.move, 
-             direction:REGISTER.startFindYourWay,
-             onlongclick:REGISTER.onlongclick,
-             onresize:REGISTER.onresize,
+             move:REGISTER.startDragAndDrop, 
+             findYourWay:REGISTER.startFindYourWay,
+             onlongclick:REGISTER.startClick,
              onmousewheel:REGISTER.onmousewheel,
              selection:TOOLS.selection,
         });  
