@@ -4,13 +4,23 @@ var DOM;
     
 
     DOM=function(){
+        
+        
+        function getOffset(e) {
+            if(e.position)return e.position();
+            e = e.getBoundingClientRect();
+            return {
+              left: e.left + window.scrollX,
+              top: e.top + window.scrollY
+            }
+        }
         var param={
             fps:30,
             timeDirection:30, //@Time to determinate where you go
             timeLongclick:600,//@Time to determinate when is a longClick
         }
         var mem={
-            window:{x:$( window ).width(),y:$( window ).height()},
+            window:{x:window.innerWidth,y:window.innerHeight},
             time:0//performance.now()
         }
         var getTime= function(){
@@ -50,10 +60,21 @@ var DOM;
                 if(dm.refresh){
                     switch(dm.way){ 
                         case "x":
-                            dm.dom.css({left: dm.posEnd.x});
+                            if(dm.dom.css){
+                                 dm.dom.css({left:dm.posEnd.x});
+                            }else{
+                                 dm.dom.style.left= dm.posEnd.x;
+                            }
+                           
                         break;
                         case "y":
-                            dm.dom.css({top: dm.posEnd.y});
+                            if(dm.dom.css){
+                                 dm.dom.css({top:dm.posEnd.y});
+                            }else{
+                                 dm.dom.style.top= dm.posEnd.y;
+                            }
+                         
+                        
                         break;
                     }
                     dm.refresh=false;
@@ -81,7 +102,8 @@ var DOM;
                 REFRESH.dragAndDrop();
             }
             var resize=function(){
-                 var w={x:$(window).width(),y:$(window).height()};
+        
+                 var w={x:window.innerWidth,y:window.innerHeight};
                 //@OPTI RESIZE X
                 if(w.x!=mem.window.x){
                     mem.window.x=w.x;
@@ -201,12 +223,12 @@ var DOM;
             }
             var startDragAndDrop=function(domNode,way,speed,callback){
                 dom.move="dragAndDrop";
-                var position = domNode.position();
+                var position = getOffset(domNode);
                 dom.dragAndDrop&&(stopDragAndDrop());
                 dom.dragAndDrop={
                     timeStart:getTime(),
                     timeEnd:getTime()+1,
-                    dom:$(domNode),
+                    dom:domNode,
                     speed:speed,
                     mouse:false,
                     posEnd:{x:position.left ,y:position.top  },
@@ -247,28 +269,25 @@ var DOM;
          var TOOLS=function(){
               var selection=function(boolean){
                        if(!boolean){
-                         $("body").find('*').css({
-                            '-moz-user-select':'-moz-none',
-                            '-moz-user-select':'none',
-                            '-o-user-select':'none',
-                            '-khtml-user-select':'none', 
-                            '-webkit-user-select':'none',
-                            '-ms-user-select':'none',
-                            'user-select':'none'
-                          });
+                                 var a=document.querySelector("*");
+                                 a.style.MozUserSelect ="none";
+                                 a.style.webkitUserSelect  ="none";
+                                 a.style.oUserSelect  ="none";
+                                 a.style.khtmlUserSelect  ="none";
+                                 a.style.msUserSelect  ="none";
+                                 a.style.userSelect  ="none";
+                          
                       }else{
-                           $("body").find('*').css({
-                            '-moz-user-select':'text',
-                            '-moz-user-select':'text',
-                            '-o-user-select':'text',
-                            '-khtml-user-select':'text',
-                            '-webkit-user-select':'text',
-                            '-ms-user-select':'text',
-                            'user-select':'text'
-                          });
+                                 var a=document.querySelector("*");
+                                 a.style.MozUserSelect ="text";
+                                 a.style.webkitUserSelect  ="text";
+                                 a.style.oUserSelect  ="text";
+                                 a.style.khtmlUserSelect  ="text";
+                                 a.style.msUserSelect  ="text";
+                                 a.style.userSelect  ="text";
                       }
              };
-        
+      
              return{
                   selection:selection,
 
@@ -279,17 +298,25 @@ var DOM;
         //@DOM EVENT 
 
         
-        $(window).resize(EVENT.resize);
-        $(document).mousemove(EVENT.mousemove);
+      
+         window.addEventListener("resize",EVENT.resize);
         document.addEventListener((/Firefox/i.test(navigator.userAgent))? "DOMMouseScroll" : "mousewheel",EVENT.mousewheel);
-        $(document).mouseup(EVENT.mouseup);
-        $(document).bind('mouseleave.dragged', EVENT.mouseup);
-       
+        document.addEventListener("mouseup",EVENT.mouseup);
+        document.addEventListener("mousemove",EVENT.mousemove);
+        document.addEventListener('mouseout', function(e) {
+          if (e.toElement == null && e.relatedTarget == null) {
+              EVENT.mouseup(e);
+          }
+        });
+  
+        
+ 
         return({
              move:REGISTER.startDragAndDrop, 
              findYourWay:REGISTER.startFindYourWay,
              onlongclick:REGISTER.startClick,
              onmousewheel:REGISTER.onmousewheel,
+             onresize:REGISTER.onresize,
              selection:TOOLS.selection,
         });  
     }();

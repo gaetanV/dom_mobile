@@ -3,7 +3,7 @@
         <title>DOM MOBILE</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <script src="../lib/jquery.min.js"></script>
+          
           <script src="../lib/DOM.js"></script>
           <style>
               
@@ -55,28 +55,21 @@
 
         DOM.selection(false);
         var longclick=function(e){
-            
-             $(e.target).css({"background":"white"});
-             
-             var cancel=function(e){
-                   $(e.target).css({"background":"white"});
-            } 
+
+             var cancel=function(e){} 
             
             
             var callback=function(e){
-                
-               
-               if(e.etat=="click"){
-                   $(e.target).css({"background":"blue"});
-                   
-               }
-               if(e.etat=="longclick"){
-                    $(e.target).css({"background":"red"});
-               }
-               if(e.etat=="longclickend"){
-                    $(e.target).css({"background":"white"});
-               }
-               
+                switch(e.etat){
+                    case "click":
+                        break;
+                    case "longclickend":
+                         e.target.style.background ="white";
+                        break;
+                    case "longclick":
+                        e.target.style.background ="red";
+                        break;   
+                }
             }
             DOM.onlongclick(e,callback,cancel)
         }
@@ -84,22 +77,21 @@
          var moveX=function(e){
              function callback(dom){
                  console.log("moveXend");
-                 $("#vitesseX").html(dom.vitesse.x);
-        
+                 document.querySelector("#vitesseX").innerHTML =dom.vitesse.x;
              }
-             DOM.move($("#test"),"x",1,callback);
-             $("#direction").html("moveX");
+             DOM.move(document.querySelector("#test"),"x",1,callback);
+             document.querySelector("#direction").innerHTML ="moveX";
+
            
          } 
          var moveY=function(e){
              
             function callback(dom){
                  console.log("moveYend");
-                 $("#vitesseY").html(dom.vitesse.y);
+                 document.querySelector("#vitesseY").innerHTML =dom.vitesse.y;   
              }
-            
-             DOM.move($("#test"),"y",1,callback);
-               $("#direction").html("moveY");
+             DOM.move(document.querySelector("#test"),"y",1,callback);
+              document.querySelector("#direction").innerHTML ="moveY";
          }
           function dragAndDrop(e){
               console.log("click");
