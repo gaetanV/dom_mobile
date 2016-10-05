@@ -1,28 +1,44 @@
 var DOM;
 (function() {
     'use strict';
-    
+   
+             if (typeof jQuery !== 'undefined') {
+                 
+                jQuery.fn.extend({
+                    touchevent:function(eventname,callback){
+                        DOM.touchevent(eventname,this,callback);
+                    },
+                    move:function(){
+                         
+                    }
+                });
+            }else{
+                console.log("JQUERY IS NOT LOADED BUT DOMEVENT IS READY");
+            }
 
+            HTMLElement.prototype.touchevent=function(eventname,callback){
+                        DOM.touchevent(eventname,this,callback);
+            };
+        
+    
     DOM=function(){
         
+   
         
-        function getOffset(e) {
-            if(e.position)return e.position();
-            e = e.getBoundingClientRect();
-            return {
-              left: e.left + window.scrollX,
-              top: e.top + window.scrollY
-            }
-        }
         var param={
+           
             fps:30,
             timeDirection:30, //@Time to determinate where you go
             timeLongclick:600,//@Time to determinate when is a longClick
         }
         var mem={
             window:{x:window.innerWidth,y:window.innerHeight},
-            time:0//performance.now()
+            time:0,//performance.now(),
+            uniqueid:0
         }
+      
+        
+        
         var getTime= function(){
             return +mem.time;
         };
@@ -35,11 +51,6 @@ var DOM;
             /* 
                 @EVENT     : REGISTER.onlongclick
                 @refresh   : Defined if move is longclick
-            */
-            FindYourWay:false,
-            /*
-                @EVENT     : REGISTER.FindYourWay
-                @mousemove : defined position
             */
             dragAndDrop:false, 
             /*
@@ -101,6 +112,19 @@ var DOM;
                 REFRESH.longClick();
                 REFRESH.dragAndDrop();
             }
+            
+           var click = function (e){   
+                    dom.move="whereYouGo";
+                    dom.click={
+                        start:getTime(),
+                        target:e.target,
+                        timeStart:getTime(),
+                        mouseStart:{x:e.clientX,y:e.clientY},
+                        etat:"click"
+                    };
+             
+            }
+            
             var resize=function(){
         
                  var w={x:window.innerWidth,y:window.innerHeight};
@@ -111,24 +135,25 @@ var DOM;
                 }
             }
             var mousemove=function(e){  
+                
                  var whereYouGo=function(e){
-                    var d=dom.FindYourWay;
+                    var d=dom.click;
                     if(getTime()>d.timeStart+param.timeDirection){
+                     
                         var distance=Math.abs(e.clientX-d.mouseStart.x)+Math.abs(e.clientY-d.mouseStart.y);
                         if(distance>4){
-                            if(dom.click){
-                                dom.click.cancel(dom.click);
-                                dom.click=false;
-                            }
+                  
                             REGISTER.stopFindYourWay(e);
                         }
                     }
                 }
                 var dragAndDrop=function(e){
+                       
                         var domObject=dom.dragAndDrop;
                         if(!domObject.mouse){domObject.mouse={x:e.clientX,y:e.clientY}}
                         switch(domObject.way){  
                             case "x":
+                              
                                 var x=domObject.posStart.x+domObject.mouse.x-e.clientX;  
                                 domObject.refresh=true;
                                 domObject.posEnd={x:x,y:domObject.posStart.y}
@@ -140,6 +165,7 @@ var DOM;
                                 break;
                         }   
                }
+               
                switch(dom.move){
                    case "whereYouGo":
                        whereYouGo(e);
@@ -155,18 +181,22 @@ var DOM;
                 for(var i in dom.scroll){dom.scroll[i](e.detail>0);};
             }
             var mouseup=function(e){
+                //e.explicitOriginalTarget
                 if(dom.click){
                     if(dom.click.etat=="longclick"){
                         REGISTER.stopLongClick();
-                    }else{
+                    }
+                    if(dom.click.etat=="click"){
                         REGISTER.stopClick();
                     }
+                  
                 };
                 if(dom.FindYourWay){REGISTER.cancelFindYourWay();}
                 if(dom.dragAndDrop){REGISTER.stopDragAndDrop();}
             }
             
             return{
+                click:click,
                 resize:resize,
                 mousemove:mousemove,
                 mousewheel:mousewheel,
@@ -175,55 +205,61 @@ var DOM;
             }
         }();
         var REGISTER=function(){
-
-            var startClick = function (e,callback,cancel){   
-                dom.click={
-                    start:getTime(),
-                    callback:callback,
-                    cancel:cancel,
-                    target:e.target,
-                    etat:"click"
-                };
-            }
             var stopClick=function(){
+                var node=dom.click.target;
+               if(node.ref && typeof node.ref.click==='function'){ node.ref.click();}
                dom.move=false;
-               dom.click.callback(dom.click)
                dom.click=false;
             }
             var startLongClick =function(){
+     
+               var node=dom.click.target;
                dom.move="longclick";
                dom.click.etat="longclick";
-               dom.click.callback(dom.click);
+               if(node.ref && typeof node.ref.longclick==='function'){node.ref.longclick(); }
             }
             var stopLongClick =function(){
-               dom.move=false;
-               dom.click.etat="longclickend";
-               dom.click.callback(dom.click);
-               dom.click=false;
+                var node=dom.click.target;
+                dom.move=false;
+                dom.click=false;
+                if(node.ref && typeof node.ref.longclickup==='function'){node.ref.longclickup(); }
             } 
 
-            var startFindYourWay=function(e,callback,cancel){
-                dom.move="whereYouGo";
-                dom.FindYourWay={
-                    callback:callback,
-                    cancel:cancel,
-                    mouseStart:{x:e.clientX,y:e.clientY},
-                    timeStart:getTime()
-                }
-            }
+        
             var stopFindYourWay=function(e){
+         
+              
+                 
+               var node=dom.click.target;
+               var direction=Math.abs(e.clientX-dom.click.mouseStart.x)>Math.abs(e.clientY-dom.click.mouseStart.y);
                dom.move=false;
-               dom.FindYourWay.callback({x:e.clientX-dom.FindYourWay.mouseStart.x,y:e.clientY-dom.FindYourWay.mouseStart.y});
-               dom.FindYourWay=false; 
+               if(direction){
+                   if(node.ref && typeof node.ref.touchX==='function'){node.ref.touchX(); }else{
+                       
+                       var parent=e.target.parentNode;
+             
+                        while(parent!=null){
+                             console.log(node);
+                            var parent=parent.parentNode;
+                         }
+                   }
+                    
+                   
+                   
+                   
+               }else{
+                   if(node.ref && typeof node.ref.touchY==='function'){node.ref.touchY(); }
+                   
+               }
+               dom.click=false;          
             }
             var cancelFindYourWay=function(){
                dom.move=false;
-               dom.FindYourWay.cancel();
-               dom.FindYourWay=false;
+               dom.click=false;
             }
             var startDragAndDrop=function(domNode,way,speed,callback){
                 dom.move="dragAndDrop";
-                var position = getOffset(domNode);
+                var position = TOOLS.getOffset(domNode);
                 dom.dragAndDrop&&(stopDragAndDrop());
                 dom.dragAndDrop={
                     timeStart:getTime(),
@@ -237,11 +273,13 @@ var DOM;
                     callback:callback,
                     refresh:false,
                 };
-                window.getSelection().removeAllRanges();
+                     
+                //window.getSelection().removeAllRanges();
                 //selection(false);
             }
-            
+       
             var stopDragAndDrop =function(){ 
+                
                 dom.move=false;
                 var domObj=dom.dragAndDrop;
                 domObj.timeEnd=getTime(); 
@@ -252,14 +290,43 @@ var DOM;
                 domObj.callback(domObj);
                 dom.dragAndDrop=false;
             }
+            var touchevent =function(eventname,e,callback){
+                if( typeof callback !=='function')throw("callback need to be a function");
+             
+                e=TOOLS.jQueryToNatif(e);
+                if(!TOOLS.isInPage(e))throw("We can't register a event on a dom not in body");
+                if(!e.ref)e.ref={};
+                switch(eventname){
+                    default:
+                        throw(eventname + "is not a known event try touchX or touchY");
+                        break;
+                    case "click":
+                        e.ref.click=callback;;
+                        break;
+                    case "longclick":
+                        e.ref.longclick=callback;;
+                        break;
+                    case "longclickup":
+                         e.ref.longclickup=callback;;
+                         break;  
+                    case "touchX":
+                         e.ref.touchX=callback;;
+                         break;
+                    case "touchY":
+                         e.ref.touchY=callback;;
+                        break;
+                    case "doubleclick":
+                        
+                        break;
+                }    
+            }
             return{
+                  touchevent:touchevent,
                   startDragAndDrop:startDragAndDrop,
                   stopDragAndDrop:stopDragAndDrop,
-                  startClick:startClick,
                   stopClick:stopClick,
                   startLongClick:startLongClick,
                   stopLongClick:stopLongClick,
-                  startFindYourWay:startFindYourWay,
                   stopFindYourWay:stopFindYourWay,
                   cancelFindYourWay:cancelFindYourWay,
                   onresize:function(space,id,callback){ if(dom.resize[space]){dom.resize[space][id]=callback;}}, 
@@ -287,22 +354,49 @@ var DOM;
                                  a.style.userSelect  ="text";
                       }
              };
-      
-             return{
-                  selection:selection,
+             
+             var jQueryToNatif = function (node) {
+                if(typeof jQuery !== 'undefined' && node instanceof jQuery){
+                        return node[0];
+                   }
+                  return node;
+             }
 
+             
+             var isInPage= function (node) {
+                node=jQueryToNatif(node);
+                if(node instanceof Node){
+                   return (node === document.body) ? false : document.body.contains(node);
+
+                }
+                throw("Argument passed is not a node element");
+                return false;
+
+             }
+           
+            var getOffset =function (node) {
+                    var e=jQueryToNatif(node);
+                    e = e.getBoundingClientRect();
+                    return {
+                      left: e.left + window.scrollX,
+                      top: e.top + window.scrollY
+                    }
+             }
+             return{
+                  getOffset:getOffset,
+                  selection:selection,
+                  jQueryToNatif:jQueryToNatif,
+                  isInPage:isInPage,
              }
          }();   
   
         setInterval(EVENT.refresh,param.fps);
         //@DOM EVENT 
-
-        
-      
-         window.addEventListener("resize",EVENT.resize);
+        window.addEventListener("resize",EVENT.resize);
         document.addEventListener((/Firefox/i.test(navigator.userAgent))? "DOMMouseScroll" : "mousewheel",EVENT.mousewheel);
         document.addEventListener("mouseup",EVENT.mouseup);
         document.addEventListener("mousemove",EVENT.mousemove);
+        document.addEventListener("mousedown",EVENT.click);
         document.addEventListener('mouseout', function(e) {
           if (e.toElement == null && e.relatedTarget == null) {
               EVENT.mouseup(e);
@@ -312,9 +406,8 @@ var DOM;
         
  
         return({
+             touchevent:REGISTER.touchevent,
              move:REGISTER.startDragAndDrop, 
-             findYourWay:REGISTER.startFindYourWay,
-             onlongclick:REGISTER.startClick,
              onmousewheel:REGISTER.onmousewheel,
              onresize:REGISTER.onresize,
              selection:TOOLS.selection,

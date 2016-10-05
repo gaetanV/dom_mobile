@@ -3,8 +3,9 @@
         <title>DOM MOBILE</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          
+         
           <script src="../lib/DOM.js"></script>
+         
           <style>
               
               #test{
@@ -39,69 +40,77 @@
             0
             
         </div>
-           <div id="test2" onMousedown="longclick(event)">
+            <div onclick="er()" id="test3" >
             LONGCLICK
             
         </div>
-        <div id="test" onMousedown="dragAndDrop(event)">
+         
+         
+         
+        <div id="test" >
             MOTION TARGET
+             <div id="test2" >
+            LONGCLICK
             
+        </div>
         </div>
        
        <script>
 
 
-
+       function er(){
+           console.log("rr");
+       }
 
         DOM.selection(false);
-        var longclick=function(e){
-
-             var cancel=function(e){} 
-            
-            
-            var callback=function(e){
-                switch(e.etat){
-                    case "click":
-                        break;
-                    case "longclickend":
-                         e.target.style.background ="white";
-                        break;
-                    case "longclick":
-                        e.target.style.background ="red";
-                        break;   
-                }
+              var test=function(e){
+                 console.log("click #test2");
+              //  console.log(e);
             }
-            DOM.onlongclick(e,callback,cancel)
-        }
+             var test2=function(e){
+               //  console.log("click #test");
+                //console.log(e);
+            }
+            
+            var test3=function(e){
+              //  console.log("longclick #test");
+                //console.log(e);
+            }
+            
+              var test4=function(e){
+              //  console.log("longclickup #test");
+                //console.log(e);
+            }
+             var touchX=function(e){
+                   
+              function callback(dom){
+                 // console.log("moveXend");
+                  document.querySelector("#vitesseX").innerHTML =dom.vitesse.x;
+              }
+              DOM.move(document.querySelector("#test"),"x",1,callback);
+              document.querySelector("#direction").innerHTML ="moveX";
         
-         var moveX=function(e){
-             function callback(dom){
-                 console.log("moveXend");
-                 document.querySelector("#vitesseX").innerHTML =dom.vitesse.x;
-             }
-             DOM.move(document.querySelector("#test"),"x",1,callback);
-             document.querySelector("#direction").innerHTML ="moveX";
-
-           
-         } 
-         var moveY=function(e){
-             
-            function callback(dom){
-                 console.log("moveYend");
+                //console.log(e);
+            }
+            
+              var touchY=function(e){
+                       function callback(dom){
+                // console.log("moveYend");
                  document.querySelector("#vitesseY").innerHTML =dom.vitesse.y;   
              }
              DOM.move(document.querySelector("#test"),"y",1,callback);
               document.querySelector("#direction").innerHTML ="moveY";
-         }
-          function dragAndDrop(e){
-              console.log("click");
-               DOM.findYourWay(e,function(movement){
-                      var direction=Math.abs(movement.x)>Math.abs(movement.y);
-                      console.log(direction);
-                      direction?moveX():moveY();
-                  },function(){console.log("cancel");});
-            };
-        
+            }
+            
+            
+         
+        // $("#test2").touchevent('click',test);
+         document.querySelector("#test").touchevent('click',test2);
+         document.querySelector("#test").touchevent('longclick',test3);
+         document.querySelector("#test").touchevent('longclickup',test4);
+         document.querySelector("#test").touchevent('touchX',touchX);
+         document.querySelector("#test").touchevent('touchY',touchY);
+
         </script>
     </body>
 </html>
