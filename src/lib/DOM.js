@@ -33,14 +33,14 @@ var DOM;
         }
         var mem={
             window:{x:window.innerWidth,y:window.innerHeight},
-            time:0,//performance.now(),
-            uniqueid:0
+            mouse:{x:0,y:0}
         }
       
         
         
         var getTime= function(){
-            return +mem.time;
+            return performance.now();
+           
         };
         var dom={
             move:false, 
@@ -63,9 +63,7 @@ var DOM;
         }
 
         var REFRESH=function(){
-            var time=function(){
-                  mem.time+=param.fps;
-            }
+       
             var  dragAndDrop=function(){
                 var dm=dom.dragAndDrop;
                 if(dm.refresh){
@@ -93,7 +91,7 @@ var DOM;
             }
             var longClick=function(){
                 if(dom.click&&dom.click.etat=="click"){
-                    if(getTime()>dom.click.start+param.timeLongclick){
+                    if(getTime()>dom.click.timeStart+param.timeLongclick){
                            REGISTER.startLongClick();      
                     }
                 }
@@ -101,25 +99,34 @@ var DOM;
             return {
                 longClick:longClick,
                 dragAndDrop:dragAndDrop,
-                time:time
+               
             }
         }();
         
         var EVENT=function(){
             //@FRAME REFRESH 
             var refresh = function(){ 
-                REFRESH.time();
+  
                 REFRESH.longClick();
                 REFRESH.dragAndDrop();
             }
             
            var click = function (e){   
+               
+               /*  
+               var mouse=document.querySelector("#mouse");
+               mouse.style.top =e.clientY+"px";
+               mouse.style.left =e.clientX+"px";
+               */
                     dom.move="whereYouGo";
                     dom.click={
-                        start:getTime(),
+                     
                         target:e.target,
                         timeStart:getTime(),
                         mouseStart:{x:e.clientX,y:e.clientY},
+                        vitesse:{x:0,y:0},
+                        origin:e.target,
+                        mouseEnd:{x:e.clientX,y:e.clientY},
                         etat:"click"
                     };
              
@@ -135,14 +142,12 @@ var DOM;
                 }
             }
             var mousemove=function(e){  
-                
+                 mem.mouse={x:e.clientX,y:e.clientY};
                  var whereYouGo=function(e){
                     var d=dom.click;
-                    if(getTime()>d.timeStart+param.timeDirection){
-                     
+                    if(getTime()>d.timeStart+param.timeDirection){                  
                         var distance=Math.abs(e.clientX-d.mouseStart.x)+Math.abs(e.clientY-d.mouseStart.y);
                         if(distance>4){
-                  
                             REGISTER.stopFindYourWay(e);
                         }
                     }
@@ -207,51 +212,55 @@ var DOM;
         var REGISTER=function(){
             var stopClick=function(){
                 var node=dom.click.target;
-               if(node.ref && typeof node.ref.click==='function'){ node.ref.click();}
+               if(node.ref && typeof node.ref.click==='function'){ node.ref.click(dom.click);}
                dom.move=false;
                dom.click=false;
             }
             var startLongClick =function(){
      
                var node=dom.click.target;
-               dom.move="longclick";
+               
                dom.click.etat="longclick";
-               if(node.ref && typeof node.ref.longclick==='function'){node.ref.longclick(); }
+               if(node.ref && typeof node.ref.longclick==='function'){
+                   node.ref.longclick(dom.click); 
+                   dom.move="longclick";
+               
+                }
             }
             var stopLongClick =function(){
                 var node=dom.click.target;
+                dom.click.etat="longclickup";
                 dom.move=false;
+                if(node.ref && typeof node.ref.longclickup==='function'){node.ref.longclickup(dom.click); }
                 dom.click=false;
-                if(node.ref && typeof node.ref.longclickup==='function'){node.ref.longclickup(); }
             } 
 
         
             var stopFindYourWay=function(e){
          
-              
+              var findParent = function(n,param){
+                        while(n!=null){
+                            if(n.ref && typeof n.ref[param]==='function'){return n }
+                            var n=n.parentNode;
+                         }
+                   return false;
+              }
                  
                var node=dom.click.target;
                var direction=Math.abs(e.clientX-dom.click.mouseStart.x)>Math.abs(e.clientY-dom.click.mouseStart.y);
                dom.move=false;
                if(direction){
-                   if(node.ref && typeof node.ref.touchX==='function'){node.ref.touchX(); }else{
-                       
-                       var parent=e.target.parentNode;
-             
-                        while(parent!=null){
-                             console.log(node);
-                            var parent=parent.parentNode;
-                         }
-                   }
-                    
-                   
-                   
-                   
-               }else{
-                   if(node.ref && typeof node.ref.touchY==='function'){node.ref.touchY(); }
-                   
+                  
+                           var parent=findParent(e.target,"touchX");
+                           if(parent){parent.ref.touchX();}
                }
-               dom.click=false;          
+               else{
+                           var parent=findParent(e.target,"touchY");
+                           if(parent){parent.ref.touchY();}
+                          
+                }
+                dom.click=false; 
+               
             }
             var cancelFindYourWay=function(){
                dom.move=false;
@@ -260,6 +269,7 @@ var DOM;
             var startDragAndDrop=function(domNode,way,speed,callback){
                 dom.move="dragAndDrop";
                 var position = TOOLS.getOffset(domNode);
+                 domNode.style.transition="none";
                 dom.dragAndDrop&&(stopDragAndDrop());
                 dom.dragAndDrop={
                     timeStart:getTime(),
@@ -291,8 +301,11 @@ var DOM;
                 dom.dragAndDrop=false;
             }
             var touchevent =function(eventname,e,callback){
+                var affectEvent=function(event){
+                     if( e.ref[event])throw("Event "+event+" is already defined");
+                     e.ref[event]=callback;
+                }
                 if( typeof callback !=='function')throw("callback need to be a function");
-             
                 e=TOOLS.jQueryToNatif(e);
                 if(!TOOLS.isInPage(e))throw("We can't register a event on a dom not in body");
                 if(!e.ref)e.ref={};
@@ -301,19 +314,19 @@ var DOM;
                         throw(eventname + "is not a known event try touchX or touchY");
                         break;
                     case "click":
-                        e.ref.click=callback;;
+                        affectEvent("click");
                         break;
                     case "longclick":
-                        e.ref.longclick=callback;;
+                        affectEvent("longclick");
                         break;
                     case "longclickup":
-                         e.ref.longclickup=callback;;
+                         affectEvent("longclickup");
                          break;  
                     case "touchX":
-                         e.ref.touchX=callback;;
+                        affectEvent("touchX");
                          break;
                     case "touchY":
-                         e.ref.touchY=callback;;
+                        affectEvent("touchY");
                         break;
                     case "doubleclick":
                         
