@@ -9,6 +9,8 @@
         <style>
             #direction{
                 padding: 20px; background: blue;
+                max-width: 500px; 
+                margin:0 auto;
                 color:#fff;
                 text-align: center;
             }
@@ -83,7 +85,7 @@
                 function callback(dom) {
                     document.querySelector("#vitesseX").innerHTML = dom.vitesse.x;
                 }
-                document.querySelector("#test").move("-x", 1, callback);
+                document.querySelector("#test").move("x", 1, callback);
                 document.querySelector("#direction").innerHTML = "moveX";
             }
 
@@ -95,6 +97,21 @@
                 document.querySelector("#test").move("y", 1, callback);
                 document.querySelector("#direction").innerHTML = "moveY";
             }
+            
+            var moveXY = function (e) {
+               
+                function callback(dom) {
+                    document.querySelector("#vitesseX").innerHTML = dom.vitesse.x;
+                    document.querySelector("#vitesseY").innerHTML = dom.vitesse.y;
+                }
+                
+                document.querySelector("#direction").move("xy", 1, callback);
+             
+            }
+            
+            
+            document.querySelector("#direction").touchevent('touchY', moveXY);
+            document.querySelector("#direction").touchevent('touchX', moveXY);
             
 
             document.querySelector("#test2").touchevent('click', click);
