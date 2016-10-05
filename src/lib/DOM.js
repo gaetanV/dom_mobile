@@ -145,12 +145,11 @@ var DOM;
                  mem.mouse={x:e.clientX,y:e.clientY};
                  var whereYouGo=function(e){
                     var d=dom.click;
-                    if(getTime()>d.timeStart+param.timeDirection){                  
-                        var distance=Math.abs(e.clientX-d.mouseStart.x)+Math.abs(e.clientY-d.mouseStart.y);
-                        if(distance>4){
+                   
+                        if(Math.abs(e.clientX-d.mouseStart.x)>4||Math.abs(e.clientY-d.mouseStart.y)>4){
                             REGISTER.stopFindYourWay(e);
                         }
-                    }
+                  
                 }
                 var dragAndDrop=function(e){
                        
