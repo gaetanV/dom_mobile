@@ -29,25 +29,11 @@
                 min-width: 250px;
                 cursor: pointer;
             }
-            #mouse{
-                position: absolute;
-                width:60px;
-                border-radius: 80px;
-                height: 60px;
-                margin-left: -40px;
-                margin-top: -40px;
-                background: transparent;
-                border:#000 solid 10px;
-                top:0;
-                left:0;
-                opacity:0.2;
-                z-index: 3000;
-                transition:"all 0.5s linear";
-            }
+            
         </style>
     </head>
     <body>
-        <div id="mouse"></div>
+   
         Vitesse X
         <div id="vitesseX">
             0
@@ -97,7 +83,7 @@
                 function callback(dom) {
                     document.querySelector("#vitesseX").innerHTML = dom.vitesse.x;
                 }
-                DOM.move(document.querySelector("#test"), "x", 1, callback);
+                document.querySelector("#test").move("-x", 1, callback);
                 document.querySelector("#direction").innerHTML = "moveX";
             }
 
@@ -106,7 +92,7 @@
                 function callback(dom) {
                     document.querySelector("#vitesseY").innerHTML = dom.vitesse.y;
                 }
-                DOM.move(document.querySelector("#test"), "y", 1, callback);
+                document.querySelector("#test").move("y", 1, callback);
                 document.querySelector("#direction").innerHTML = "moveY";
             }
             

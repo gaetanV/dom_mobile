@@ -8,8 +8,8 @@ var DOM;
                     touchevent:function(eventname,callback){
                         DOM.touchevent(eventname,this,callback);
                     },
-                    move:function(){
-                         
+                    move:function(direction,speed,callback){
+                           DOM.move(this,direction,speed,callback);
                     }
                 });
             }else{
@@ -19,7 +19,9 @@ var DOM;
             HTMLElement.prototype.touchevent=function(eventname,callback){
                         DOM.touchevent(eventname,this,callback);
             };
-        
+            HTMLElement.prototype.move=function(direction,speed,callback){
+                        DOM.move(this,direction,speed,callback);
+            };
     
     DOM=function(){
         
@@ -27,8 +29,7 @@ var DOM;
         
         var param={
            
-            fps:30,
-            timeDirection:30, //@Time to determinate where you go
+            fps:60,
             timeLongclick:600,//@Time to determinate when is a longClick
         }
         var mem={
@@ -49,12 +50,12 @@ var DOM;
             */
             click:false,
             /* 
-                @EVENT     : REGISTER.onlongclick
+                @EVENT     : TOUCHEVENT.onlongclick
                 @refresh   : Defined if move is longclick
             */
             dragAndDrop:false, 
             /*
-                @EVENT     : REGISTER.dragAndDrop
+                @EVENT     : TOUCHEVENT.dragAndDrop
                 @mousemove : defined position
                 @refresh:  : refresh css
             */
@@ -62,78 +63,18 @@ var DOM;
             scroll:[],
         }
 
-        var REFRESH=function(){
-       
-            var  dragAndDrop=function(){
-                var dm=dom.dragAndDrop;
-                if(dm.refresh){
-                    switch(dm.way){ 
-                        case "x":
-                            if(dm.dom.css){
-                                 dm.dom.css({left:dm.posEnd.x});
-                            }else{
-                                 dm.dom.style.left= dm.posEnd.x;
-                            }
-                           
-                        break;
-                        case "y":
-                            if(dm.dom.css){
-                                 dm.dom.css({top:dm.posEnd.y});
-                            }else{
-                                 dm.dom.style.top= dm.posEnd.y;
-                            }
-                         
-                        
-                        break;
-                    }
-                    dm.refresh=false;
-                }
-            }
-            var longClick=function(){
-                if(dom.click&&dom.click.etat=="click"){
-                    if(getTime()>dom.click.timeStart+param.timeLongclick){
-                           REGISTER.startLongClick();      
-                    }
-                }
-            }
-            return {
-                longClick:longClick,
-                dragAndDrop:dragAndDrop,
-               
-            }
-        }();
-        
+   
         var EVENT=function(){
             //@FRAME REFRESH 
             var refresh = function(){ 
-  
-                REFRESH.longClick();
-                REFRESH.dragAndDrop();
+                TOUCHEVENT.refresh();
+                DOMMOVE.refresh();
             }
-            
-           var click = function (e){   
-               
-               /*  
-               var mouse=document.querySelector("#mouse");
-               mouse.style.top =e.clientY+"px";
-               mouse.style.left =e.clientX+"px";
-               */
-                    dom.move="whereYouGo";
-                    dom.click={
-                     
-                        target:e.target,
-                        timeStart:getTime(),
-                        mouseStart:{x:e.clientX,y:e.clientY},
-                        vitesse:{x:0,y:0},
-                        origin:e.target,
-                        mouseEnd:{x:e.clientX,y:e.clientY},
-                        etat:"click"
-                    };
-             
+            var click = function (e){     
+                TOUCHEVENT.click(e);   
             }
             
             var resize=function(){
-        
                  var w={x:window.innerWidth,y:window.innerHeight};
                 //@OPTI RESIZE X
                 if(w.x!=mem.window.x){
@@ -141,41 +82,15 @@ var DOM;
                     for(var i in dom.resize.x){dom.resize.x[i]();}
                 }
             }
+            
             var mousemove=function(e){  
-                 mem.mouse={x:e.clientX,y:e.clientY};
-                 var whereYouGo=function(e){
-                    var d=dom.click;
-                   
-                        if(Math.abs(e.clientX-d.mouseStart.x)>4||Math.abs(e.clientY-d.mouseStart.y)>4){
-                            REGISTER.stopFindYourWay(e);
-                        }
-                  
-                }
-                var dragAndDrop=function(e){
-                       
-                        var domObject=dom.dragAndDrop;
-                        if(!domObject.mouse){domObject.mouse={x:e.clientX,y:e.clientY}}
-                        switch(domObject.way){  
-                            case "x":
-                              
-                                var x=domObject.posStart.x+domObject.mouse.x-e.clientX;  
-                                domObject.refresh=true;
-                                domObject.posEnd={x:x,y:domObject.posStart.y}
-                                break;
-                            case "y":
-                                var y=domObject.posStart.y+(domObject.mouse.y-e.clientY)*domObject.speed;  
-                                domObject.refresh=true;
-                                domObject.posEnd={y:y,x:domObject.posStart.x}
-                                break;
-                        }   
-               }
-               
+               mem.mouse={x:e.clientX,y:e.clientY};
                switch(dom.move){
                    case "whereYouGo":
-                       whereYouGo(e);
+                       TOUCHEVENT.mousemove(e);        
                        break;
                    case "dragAndDrop":
-                       dragAndDrop(e);
+                       DOMMOVE.mousemove(e);
                        break;
                    case "longclick": 
                        break;
@@ -185,18 +100,12 @@ var DOM;
                 for(var i in dom.scroll){dom.scroll[i](e.detail>0);};
             }
             var mouseup=function(e){
+                dom.move=false;
                 //e.explicitOriginalTarget
                 if(dom.click){
-                    if(dom.click.etat=="longclick"){
-                        REGISTER.stopLongClick();
-                    }
-                    if(dom.click.etat=="click"){
-                        REGISTER.stopClick();
-                    }
-                  
-                };
-                if(dom.FindYourWay){REGISTER.cancelFindYourWay();}
-                if(dom.dragAndDrop){REGISTER.stopDragAndDrop();}
+                    TOUCHEVENT.mouseup();
+                }
+                if(dom.dragAndDrop){DOMMOVE.stopDragAndDrop();}
             }
             
             return{
@@ -208,7 +117,51 @@ var DOM;
                 refresh:refresh
             }
         }();
-        var REGISTER=function(){
+    
+      
+        var TOUCHEVENT=function(){
+            var domEvents={
+                   refresh:function(){
+                       if(dom.click&&dom.click.etat=="click"){
+                           if(getTime()>dom.click.timeStart+param.timeLongclick){
+                                  TOUCHEVENT.startLongClick();   
+                                  
+                           }
+                       }
+                   },
+                   click : function (e){   
+                           dom.move="whereYouGo";
+                           dom.click={
+                               target:e.target,
+                               timeStart:getTime(),
+                               mouseStart:{x:e.clientX,y:e.clientY},
+                               vitesse:{x:0,y:0},
+                               origin:e.target,
+                               mouseEnd:{x:e.clientX,y:e.clientY},
+                               etat:"click"
+                           };
+
+                   },
+                   mousemove:function(e){
+                       
+                         var d=dom.click;
+                        if(Math.abs(e.clientX-d.mouseStart.x)>4||Math.abs(e.clientY-d.mouseStart.y)>4){
+                            TOUCHEVENT.stopFindYourWay(e);
+                         }
+
+                   },
+                   mouseup:function(e){      
+                        if(dom.click.etat=="longclick"){
+                                TOUCHEVENT.stopLongClick();
+                        }
+                        if(dom.click.etat=="click"){
+                              TOUCHEVENT.stopClick();
+                              TOUCHEVENT.cancelFindYourWay();
+                        }
+                       dom.click=false;
+                  }
+            }
+            
             var stopClick=function(){
                 var node=dom.click.target;
                if(node.ref && typeof node.ref.click==='function'){ node.ref.click(dom.click);}
@@ -216,9 +169,7 @@ var DOM;
                dom.click=false;
             }
             var startLongClick =function(){
-     
                var node=dom.click.target;
-               
                dom.click.etat="longclick";
                if(node.ref && typeof node.ref.longclick==='function'){
                    node.ref.longclick(dom.click); 
@@ -237,15 +188,13 @@ var DOM;
         
             var stopFindYourWay=function(e){
          
-              var findParent = function(n,param){
-                        while(n!=null){
-                            if(n.ref && typeof n.ref[param]==='function'){return n }
-                            var n=n.parentNode;
-                         }
-                   return false;
-              }
-                 
-               var node=dom.click.target;
+                var findParent = function(n,param){
+                          while(n!=null){
+                              if(n.ref && typeof n.ref[param]==='function'){return n }
+                              var n=n.parentNode;
+                           }
+                     return false;
+                }
                var direction=Math.abs(e.clientX-dom.click.mouseStart.x)>Math.abs(e.clientY-dom.click.mouseStart.y);
                dom.move=false;
                if(direction){
@@ -265,40 +214,7 @@ var DOM;
                dom.move=false;
                dom.click=false;
             }
-            var startDragAndDrop=function(domNode,way,speed,callback){
-                dom.move="dragAndDrop";
-                var position = TOOLS.getOffset(domNode);
-                 domNode.style.transition="none";
-                dom.dragAndDrop&&(stopDragAndDrop());
-                dom.dragAndDrop={
-                    timeStart:getTime(),
-                    timeEnd:getTime()+1,
-                    dom:domNode,
-                    speed:speed,
-                    mouse:false,
-                    posEnd:{x:position.left ,y:position.top  },
-                    posStart:{x:position.left ,y:position.top  },
-                    way:way,
-                    callback:callback,
-                    refresh:false,
-                };
-                     
-                //window.getSelection().removeAllRanges();
-                //selection(false);
-            }
-       
-            var stopDragAndDrop =function(){ 
-                
-                dom.move=false;
-                var domObj=dom.dragAndDrop;
-                domObj.timeEnd=getTime(); 
-                var time=domObj.timeEnd-domObj.timeStart;
-                var x= Math.abs(domObj.posStart.x-domObj.posEnd.x);
-                var y= Math.abs(domObj.posStart.y-domObj.posEnd.y);
-                domObj.vitesse={x:1/(time*1/x),y:1/(time*1/y)}; 
-                domObj.callback(domObj);
-                dom.dragAndDrop=false;
-            }
+    
             var touchevent =function(eventname,e,callback){
                 var affectEvent=function(event){
                      if( e.ref[event])throw("Event "+event+" is already defined");
@@ -333,18 +249,108 @@ var DOM;
                 }    
             }
             return{
+                  click:domEvents.click,
+                  mousemove:domEvents.mousemove,
+                  refresh:domEvents.refresh,
+                  mouseup:domEvents.mouseup,
                   touchevent:touchevent,
-                  startDragAndDrop:startDragAndDrop,
-                  stopDragAndDrop:stopDragAndDrop,
                   stopClick:stopClick,
                   startLongClick:startLongClick,
                   stopLongClick:stopLongClick,
                   stopFindYourWay:stopFindYourWay,
                   cancelFindYourWay:cancelFindYourWay,
-                  onresize:function(space,id,callback){ if(dom.resize[space]){dom.resize[space][id]=callback;}}, 
-                  onmousewheel:function(id,callback){dom.scroll[id]=callback;} ,
+                 
             } 
         }();
+        
+        var DOMEVENT=function(){     
+            return {
+                 onresize:function(space,id,callback){ if(dom.resize[space]){dom.resize[space][id]=callback;}}, 
+                 onmousewheel:function(id,callback){dom.scroll[id]=callback;} ,  
+            }
+        }();
+        
+         var DOMMOVE=function(){
+             var domEvents={
+                 refresh:function(){
+                    var dm=dom.dragAndDrop;
+                    if(dm.refresh){
+                            dm.dom.style.left= dm.posEnd.x;
+                            dm.dom.style.top= dm.posEnd.y;
+                            dm.refresh=false;
+                    }
+                 },
+                 mousemove:function(e){
+                        var d=dom.dragAndDrop;
+                        if(!d.mouse){d.mouse={x:e.clientX,y:e.clientY}}
+                        var x=d.posStart.x;
+                        var y=d.posStart.y;
+                         
+                        switch(d.way){  
+                            case "-x":
+                                x+=(d.mouse.x-e.clientX)*d.speed;  
+                                break;
+                            case "x":
+                                x-=(d.mouse.x-e.clientX)*d.speed;  
+                                break;
+                            case "-y":
+                                y+=(d.mouse.y-e.clientY)*d.speed;  
+                                break;
+                             case "y":
+                                y-=(d.mouse.y-e.clientY)*d.speed;  
+                                break;
+                             case "xy":
+                                x-=(d.mouse.x-e.clientX)*d.speed; 
+                                y-=(d.mouse.y-e.clientY)*d.speed;  
+                                break;
+                        }   
+                          
+                        d.refresh=true;
+                        d.posEnd={y:y,x:x};
+                 }
+             }
+             var startDragAndDrop=function(domNode,way,speed,callback){
+                dom.move="dragAndDrop";
+                var position = TOOLS.getOffset(domNode);
+                domNode.style.transition="none";
+                dom.dragAndDrop&&(stopDragAndDrop());
+                dom.dragAndDrop={
+                    timeStart:getTime(),
+                    timeEnd:getTime()+1,
+                    dom:domNode,
+                    speed:speed,
+                    mouse:false,
+                    posEnd:{x:position.left ,y:position.top  },
+                    posStart:{x:position.left ,y:position.top  },
+                    way:way,
+                    callback:callback,
+                    refresh:false,
+                };
+            }
+       
+            var stopDragAndDrop =function(){ 
+                dom.move=false;
+                var domObj=dom.dragAndDrop;
+                domObj.timeEnd=getTime(); 
+                var time=domObj.timeEnd-domObj.timeStart;
+                var x= Math.abs(domObj.posStart.x-domObj.posEnd.x);
+                var y= Math.abs(domObj.posStart.y-domObj.posEnd.y);
+                domObj.vitesse={x:1/(time*1/x),y:1/(time*1/y)}; 
+                domObj.callback(domObj);
+                dom.dragAndDrop=false;
+            }
+             
+             return{
+                 refresh:domEvents.refresh,
+                 mousemove:domEvents.mousemove,
+                 startDragAndDrop:startDragAndDrop,
+                 stopDragAndDrop:stopDragAndDrop,
+               
+                 
+             }
+             
+         }();
+         
          var TOOLS=function(){
               var selection=function(boolean){
                        if(!boolean){
@@ -385,13 +391,28 @@ var DOM;
                 return false;
 
              }
-           
-            var getOffset =function (node) {
+      
+            var getOffset =function (node) {          
                     var e=jQueryToNatif(node);
                     e = e.getBoundingClientRect();
+                    var h = node.clientHeight;
+                    var computedStyle = window.getComputedStyle(node); 
+                    var marginTop=parseInt(computedStyle.marginTop, 10);
+                    var borderTop=parseInt(computedStyle.borderTopWidth, 10)
+                    h += marginTop+borderTop;
+                    h += parseInt(computedStyle.borderBottomWidth, 10);
+                    h += parseInt(computedStyle.marginBottom, 10);
+                    var w = node.clientWidth;
+                    w += parseInt(computedStyle.marginRight, 10);
+                    w += parseInt(computedStyle.borderRightWidth, 10);
+                    var marginLeft=parseInt(computedStyle.marginLeft, 10);;
+                    var borderLeft=parseInt(computedStyle.borderLeftWidth, 10);
+                    w += borderLeft + marginLeft;
                     return {
-                      left: e.left + window.scrollX,
-                      top: e.top + window.scrollY
+                        left: e.left + window.scrollX-marginLeft-borderLeft,
+                        top: e.top + window.scrollY-marginTop-borderTop,
+                        outer:{height:h,width:w},
+                        inner:{height:node.clientHeight,width:node.clientWidth}
                     }
              }
              return{
@@ -415,13 +436,11 @@ var DOM;
           }
         });
   
-        
- 
         return({
-             touchevent:REGISTER.touchevent,
-             move:REGISTER.startDragAndDrop, 
-             onmousewheel:REGISTER.onmousewheel,
-             onresize:REGISTER.onresize,
+             touchevent:TOUCHEVENT.touchevent,
+             move:DOMMOVE.startDragAndDrop, 
+             onmousewheel:DOMEVENT.onmousewheel,
+             onresize:DOMEVENT.onresize,
              selection:TOOLS.selection,
         });  
     }();
