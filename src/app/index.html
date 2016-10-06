@@ -31,11 +31,11 @@
                 min-width: 250px;
                 cursor: pointer;
             }
-            
+
         </style>
     </head>
     <body>
-   
+
         Vitesse X
         <div id="vitesseX">
             0
@@ -50,7 +50,7 @@
             0
 
         </div>
-    
+
         <div id="test" >
             MOVE ME
             <div id="test2" >
@@ -62,26 +62,24 @@
         <script>
             DOM.selection(false);
             var click = function (e) {
-          
-                 e.target.innerHTML = "CLICK A LONG TIME";
-                 document.querySelector("#direction").innerHTML = "click";
+                e.target.innerHTML = "CLICK A LONG TIME";
+                document.querySelector("#direction").innerHTML = "click";
             }
 
             var longclick = function (e) {
-                console.log(e);
-                  e.target.innerHTML = "HOLD ON";
-                e.target.style.background="red";
-               document.querySelector("#direction").innerHTML = "longclick";
+                e.target.innerHTML = "HOLD ON";
+                e.target.style.background = "red";
+                document.querySelector("#direction").innerHTML = "longclick";
             }
 
             var longclickup = function (e) {
                 e.target.innerHTML = "CLICK ME";
-               e.target.style.background="white";
-               document.querySelector("#direction").innerHTML = "longclickup";
+                e.target.style.background = "white";
+                document.querySelector("#direction").innerHTML = "longclickup";
             }
-            
+
             var touchX = function (e) {
-              
+
                 function callback(dom) {
                     document.querySelector("#vitesseX").innerHTML = dom.vitesse.x;
                 }
@@ -90,49 +88,59 @@
             }
 
             var touchY = function (e) {
-    
+
                 function callback(dom) {
                     document.querySelector("#vitesseY").innerHTML = dom.vitesse.y;
                 }
                 document.querySelector("#test").move("y", 1, callback);
                 document.querySelector("#direction").innerHTML = "moveY";
             }
-            
+
             var moveXY = function (e) {
-               
+
                 function callback(dom) {
-                    
+
                     document.querySelector("#vitesseX").innerHTML = dom.vitesse.x;
                     document.querySelector("#vitesseY").innerHTML = dom.vitesse.y;
                 }
-                
+
                 document.querySelector("#direction").move("xy", 1, callback);
-             
+
             }
-             var scrollUp = function (e) {
+            var scrollUp = function (e) {
                 e.target.innerHTML = "SCROLL UP";
                 document.querySelector("#direction").innerHTML = "scrollUp";
-             
+
             }
             var scrollDown = function (e) {
-              e.target.innerHTML = "SCROLL DOWN";
+                e.target.innerHTML = "SCROLL DOWN";
                 document.querySelector("#direction").innerHTML = "scrollDown";
-             
+
+            }
+            var dbclick = function (e) {
+                e.target.innerHTML = "DBCLICK";
+                document.querySelector("#direction").innerHTML = "dbclick";
+
+            }
+            var clickBox = function (e) {
+    
+                document.querySelector("#direction").innerHTML = "click";
+
             }
             
             
             document.querySelector("#direction").touchevent('touchY', moveXY);
             document.querySelector("#direction").touchevent('touchX', moveXY);
-            
             document.querySelector("#test2").touchevent('scrollUp', scrollUp);
             document.querySelector("#test2").touchevent('scrollDown', scrollDown);
-            
             document.querySelector("#test2").touchevent('click', click);
             document.querySelector("#test2").touchevent('longclick', longclick);
-            
+            document.querySelector("#test2").touchevent('dbclick', dbclick);
             document.querySelector("#test2").touchevent('longclickup', longclickup);
             document.querySelector("#test").touchevent('touchY', touchY);
             document.querySelector("#test").touchevent('touchX', touchX);
+            
+              document.querySelector("#test").touchevent('click', clickBox);
         </script>
     </body>
 </html>

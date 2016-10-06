@@ -30,11 +30,12 @@ var DOM;
         var param={
            
             fps:60,
-            timeLongclick:600,//@Time to determinate when is a longClick
+            timeLongclick:400,//@Time to determinate when is a longClick
+            timeDbclick:200,
         }
         var mem={
             window:{x:window.innerWidth,y:window.innerHeight},
-            mouse:{x:0,y:0}
+
         }
       
         
@@ -87,8 +88,14 @@ var DOM;
                        }
                    },
                    click : function (e){   
+                        if(dom.click.etat==="waitclick"){
+                            TOUCHEVENT.stopDbClick();
+                         
+                        }else{
                            dom.move="whereYouGo";
                            dom.click=newevent(e,"click");
+                        }
+                       
 
                    },
                    mousemove:function(e){
@@ -102,10 +109,19 @@ var DOM;
                                 TOUCHEVENT.stopLongClick();
                         }
                         if(dom.click.etat=="click"){
-                              TOUCHEVENT.stopClick();
-                              TOUCHEVENT.cancelFindYourWay();
+                             
+                              var node=dom.click.target;
+                                  dom.click.etat="waitclick";
+                               if(node.ref && typeof node.ref.dbclick==='function'){ 
+                                
+                                    setTimeout(function(){ TOUCHEVENT.stopClick() ; }, param.timeDbclick);
+                               }else{
+                                   TOUCHEVENT.stopClick() ;
+                               }
+                             
                         }
-                       dom.click=false;
+                   
+                    
                   },
                   mousewheel:function(e){
                        dom.scroll=newevent(e,"scroll");
@@ -125,12 +141,25 @@ var DOM;
                  if(parent){dom.scroll.target=parent;dom.scroll.etat="scrollDown";parent.ref.scrollDown(dom.scroll);dom.scroll.etat="freeze";}
        
              }
-            
+             var stopDbClick=function(){
+                    if(dom.click.etat==="waitclick"){
+                        dom.click.etat="dbclick"
+                        var node=dom.click.target;
+                        if(node.ref && typeof node.ref.dbclick==='function'){ node.ref.dbclick(dom.click);}
+                        dom.click=false;
+                    }
+                   
+            }
             var stopClick=function(){
-                var node=dom.click.target;
-               if(node.ref && typeof node.ref.click==='function'){ node.ref.click(dom.click);}
-               dom.move=false;
-               dom.click=false;
+                if(dom.click.etat==="waitclick"){
+                    dom.click.etat="clickup"
+                    var node=dom.click.target;
+                    if(node.ref && typeof node.ref.click==='function'){ node.ref.click(dom.click);}
+                    dom.move=false;
+                
+                }
+                dom.click=false;
+             
             }
             var startLongClick =function(){
                var node=dom.click.target;
@@ -164,14 +193,10 @@ var DOM;
                            if(parent){parent.ref.touchY();}
                           
                 }
-                dom.click=false; 
+               dom.click=false; 
                
             }
-            var cancelFindYourWay=function(){
-               dom.move=false;
-               dom.click=false;
-            }
-    
+      
             var touchevent =function(eventname,e,callback){
                 var affectEvent=function(e,event,callback){
                      if( typeof callback !=='function')throw("callback need to be a function");
@@ -201,8 +226,8 @@ var DOM;
                     case "touchY":
                         affectEvent(e,"touchY",callback);
                         break;
-                    case "doubleclick":
-                        
+                    case "dbclick":
+                        affectEvent(e,"dbclick",callback);
                         break;
                     case "scrollUp":
                         affectEvent(e,"scrollUp",callback);
@@ -219,12 +244,13 @@ var DOM;
                   refresh:domEvents.refresh,
                   mouseup:domEvents.mouseup,
                   mousewheel:domEvents.mousewheel,
+                  stopDbClick:stopDbClick,
                   touchevent:touchevent,
                   stopClick:stopClick,
                   startLongClick:startLongClick,
                   stopLongClick:stopLongClick,
                   stopFindYourWay:stopFindYourWay,
-                  cancelFindYourWay:cancelFindYourWay,
+                  
                   stopScrollDown:stopScrollDown,
                   stopScrollUp:stopScrollUp
                  
@@ -459,7 +485,7 @@ var DOM;
             }
             
             var mousemove=function(e){  
-               mem.mouse={x:e.clientX,y:e.clientY};
+  
               
                switch(dom.move){
                    default:
@@ -476,9 +502,6 @@ var DOM;
             }
             var mousewheel=function(e){
                 TOUCHEVENT.mousewheel(e); 
-             
-                
-
             }
             var mouseup=function(e){
                
@@ -515,6 +538,8 @@ var DOM;
               EVENT.mouseup(e);
           }
         });
+        
+        
   
         return({
              touchevent:TOUCHEVENT.touchevent,
