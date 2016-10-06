@@ -101,6 +101,7 @@
             var moveXY = function (e) {
                
                 function callback(dom) {
+                    
                     document.querySelector("#vitesseX").innerHTML = dom.vitesse.x;
                     document.querySelector("#vitesseY").innerHTML = dom.vitesse.y;
                 }
@@ -108,12 +109,24 @@
                 document.querySelector("#direction").move("xy", 1, callback);
              
             }
+             var scrollUp = function (e) {
+                e.target.innerHTML = "SCROLL UP";
+                document.querySelector("#direction").innerHTML = "scrollUp";
+             
+            }
+            var scrollDown = function (e) {
+              e.target.innerHTML = "SCROLL DOWN";
+                document.querySelector("#direction").innerHTML = "scrollDown";
+             
+            }
             
             
             document.querySelector("#direction").touchevent('touchY', moveXY);
             document.querySelector("#direction").touchevent('touchX', moveXY);
             
-
+            document.querySelector("#test2").touchevent('scrollUp', scrollUp);
+            document.querySelector("#test2").touchevent('scrollDown', scrollDown);
+            
             document.querySelector("#test2").touchevent('click', click);
             document.querySelector("#test2").touchevent('longclick', longclick);
             

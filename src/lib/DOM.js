@@ -54,47 +54,48 @@ var DOM;
                 @refresh   : Defined if move is longclick
             */
             dragAndDrop:false, 
+            scroll:false,
             /*
                 @EVENT     : TOUCHEVENT.dragAndDrop
                 @mousemove : defined position
                 @refresh:  : refresh css
             */
             resize:{x:[],y:[],xy:[]},
-            scroll:[],
         }
 
 
       
         var TOUCHEVENT=function(){
+            
+            var newevent =function(e,name){
+                return {
+                    target:e.target,
+                    timeStart:getTime(),
+                    mouseStart:{x:e.clientX,y:e.clientY},
+                    vitesse:{x:0,y:0},
+                    origin:e.target,
+                    mouseEnd:{x:e.clientX,y:e.clientY},
+                    etat:name
+                };
+            };
             var domEvents={
                    refresh:function(){
                        if(dom.click&&dom.click.etat=="click"){
                            if(getTime()>dom.click.timeStart+param.timeLongclick){
-                                  TOUCHEVENT.startLongClick();   
-                                  
+                                  TOUCHEVENT.startLongClick();         
                            }
                        }
                    },
                    click : function (e){   
                            dom.move="whereYouGo";
-                           dom.click={
-                               target:e.target,
-                               timeStart:getTime(),
-                               mouseStart:{x:e.clientX,y:e.clientY},
-                               vitesse:{x:0,y:0},
-                               origin:e.target,
-                               mouseEnd:{x:e.clientX,y:e.clientY},
-                               etat:"click"
-                           };
+                           dom.click=newevent(e,"click");
 
                    },
                    mousemove:function(e){
-                       
                          var d=dom.click;
                         if(Math.abs(e.clientX-d.mouseStart.x)>4||Math.abs(e.clientY-d.mouseStart.y)>4){
                             TOUCHEVENT.stopFindYourWay(e);
                          }
-
                    },
                    mouseup:function(e){      
                         if(dom.click.etat=="longclick"){
@@ -105,8 +106,25 @@ var DOM;
                               TOUCHEVENT.cancelFindYourWay();
                         }
                        dom.click=false;
+                  },
+                  mousewheel:function(e){
+                       dom.scroll=newevent(e,"scroll");
+                       e.detail>0?TOUCHEVENT.stopScrollDown(): TOUCHEVENT.stopScrollUp();
+                       if(dom.scroll.etat=="freeze"){
+                           e.preventDefault();
+                       }
+                       dom.scroll=false;
                   }
             }
+            var stopScrollUp=function(){
+                  var parent=TOOLS.findParent(dom.scroll.target,"scrollUp");
+                  if(parent){dom.scroll.target=parent;dom.scroll.etat="scrollUp";parent.ref.scrollUp(dom.scroll);dom.scroll.etat="freeze";}  
+            };
+             var stopScrollDown=function(){
+                 var parent=TOOLS.findParent(dom.scroll.target,"scrollDown");
+                 if(parent){dom.scroll.target=parent;dom.scroll.etat="scrollDown";parent.ref.scrollDown(dom.scroll);dom.scroll.etat="freeze";}
+       
+             }
             
             var stopClick=function(){
                 var node=dom.click.target;
@@ -134,23 +152,15 @@ var DOM;
 
         
             var stopFindYourWay=function(e){
-         
-                var findParent = function(n,param){
-                          while(n!=null){
-                              if(n.ref && typeof n.ref[param]==='function'){return n }
-                              var n=n.parentNode;
-                           }
-                     return false;
-                }
                var direction=Math.abs(e.clientX-dom.click.mouseStart.x)>Math.abs(e.clientY-dom.click.mouseStart.y);
                dom.move=false;
                if(direction){
                   
-                           var parent=findParent(e.target,"touchX");
+                           var parent=TOOLS.findParent(e.target,"touchX");
                            if(parent){parent.ref.touchX();}
                }
                else{
-                           var parent=findParent(e.target,"touchY");
+                           var parent=TOOLS.findParent(e.target,"touchY");
                            if(parent){parent.ref.touchY();}
                           
                 }
@@ -163,36 +173,44 @@ var DOM;
             }
     
             var touchevent =function(eventname,e,callback){
-                var affectEvent=function(event){
+                var affectEvent=function(e,event,callback){
+                     if( typeof callback !=='function')throw("callback need to be a function");
+                     e=TOOLS.jQueryToNatif(e);
+                     if(!TOOLS.isInPage(e))throw("We can't register a event on a dom not in body");
+                     if(!e.ref)e.ref={};
                      if( e.ref[event])throw("Event "+event+" is already defined");
                      e.ref[event]=callback;
                 }
-                if( typeof callback !=='function')throw("callback need to be a function");
-                e=TOOLS.jQueryToNatif(e);
-                if(!TOOLS.isInPage(e))throw("We can't register a event on a dom not in body");
-                if(!e.ref)e.ref={};
+            
                 switch(eventname){
                     default:
                         throw(eventname + "is not a known event try touchX or touchY");
                         break;
                     case "click":
-                        affectEvent("click");
+                        affectEvent(e,"click",callback);
                         break;
                     case "longclick":
-                        affectEvent("longclick");
+                        affectEvent(e,"longclick",callback);
                         break;
                     case "longclickup":
-                         affectEvent("longclickup");
+                         affectEvent(e,"longclickup",callback);
                          break;  
                     case "touchX":
-                        affectEvent("touchX");
+                        affectEvent(e,"touchX",callback);
                          break;
                     case "touchY":
-                        affectEvent("touchY");
+                        affectEvent(e,"touchY",callback);
                         break;
                     case "doubleclick":
                         
                         break;
+                    case "scrollUp":
+                        affectEvent(e,"scrollUp",callback);
+                        break;
+                    case "scrollDown":
+                        affectEvent(e,"scrollDown",callback);
+                        break;
+                        
                 }    
             }
             return{
@@ -200,20 +218,22 @@ var DOM;
                   mousemove:domEvents.mousemove,
                   refresh:domEvents.refresh,
                   mouseup:domEvents.mouseup,
+                  mousewheel:domEvents.mousewheel,
                   touchevent:touchevent,
                   stopClick:stopClick,
                   startLongClick:startLongClick,
                   stopLongClick:stopLongClick,
                   stopFindYourWay:stopFindYourWay,
                   cancelFindYourWay:cancelFindYourWay,
+                  stopScrollDown:stopScrollDown,
+                  stopScrollUp:stopScrollUp
                  
             } 
         }();
         
         var DOMEVENT=function(){     
             return {
-                 onresize:function(space,id,callback){ if(dom.resize[space]){dom.resize[space][id]=callback;}}, 
-                 onmousewheel:function(id,callback){dom.scroll[id]=callback;} ,  
+                 onresize:function(space,id,callback){ if(dom.resize[space]){dom.resize[space][id]=callback;}},  
             }
         }();
         
@@ -222,11 +242,9 @@ var DOM;
                  refresh:function(){
                       
                     var dm=dom.dragAndDrop;
-                    if(dm.refresh){
-                        
+                    if(dm.refresh){    
                             dm.dom.style.left= dm.posEnd.x;
                             dm.dom.style.top= dm.posEnd.y;
-                            
                             dm.refresh=false;
                     }
                  },
@@ -256,7 +274,7 @@ var DOM;
                                 
                                 break;
                         }   
-                           console.log("move");
+                         
                         d.refresh=true;
                         d.posEnd={y:y,x:x};
                        
@@ -292,13 +310,13 @@ var DOM;
                 };
                 if(computedStyle.position!=="absolute"||computedStyle.position!=="fixed"){
                     dom.dragAndDrop.dom.style.width=position.inner.width+"px";
-                     dom.dragAndDrop.dom.style.top=position.top+"px";
-                     dom.dragAndDrop.dom.style.left=position.left+"px";
+                    dom.dragAndDrop.dom.style.top=position.top+"px";
+                    dom.dragAndDrop.dom.style.left=position.left+"px";
                     dom.dragAndDrop.dom.style.height=position.inner.height+"px";
                     dom.dragAndDrop.dom.style.position="absolute";
                     dom.dragAndDrop.dom.style.zIndex="200";
                 }
-                
+              
             }
        
             var stopDragAndDrop =function(){ 
@@ -326,13 +344,20 @@ var DOM;
                  mouseup:domEvents.mouseup,
                  startDragAndDrop:startDragAndDrop,
                  stopDragAndDrop:stopDragAndDrop,
-               
-                 
              }
              
          }();
          
          var TOOLS=function(){
+              var findParent = function(n,param){
+                          while(n!=null){
+                              if(n.ref && typeof n.ref[param]==='function'){return n }
+                              var n=n.parentNode;
+                           }
+                     return false;
+              }
+             
+             
               var selection=function(boolean){
                        if(!boolean){
                                  var a=document.querySelector("*");
@@ -408,6 +433,7 @@ var DOM;
                   selection:selection,
                   jQueryToNatif:jQueryToNatif,
                   isInPage:isInPage,
+                  findParent:findParent,
              }
          }();   
   
@@ -422,7 +448,8 @@ var DOM;
                 TOUCHEVENT.click(e);   
             }
             
-            var resize=function(){
+            var resize=function(e){
+               
                  var w={x:window.innerWidth,y:window.innerHeight};
                 //@OPTI RESIZE X
                 if(w.x!=mem.window.x){
@@ -435,6 +462,8 @@ var DOM;
                mem.mouse={x:e.clientX,y:e.clientY};
               
                switch(dom.move){
+                   default:
+                       break;
                    case "whereYouGo":
                        TOUCHEVENT.mousemove(e);        
                        break;
@@ -446,7 +475,10 @@ var DOM;
                }
             }
             var mousewheel=function(e){
-                for(var i in dom.scroll){dom.scroll[i](e.detail>0);};
+                TOUCHEVENT.mousewheel(e); 
+             
+                
+
             }
             var mouseup=function(e){
                
@@ -487,7 +519,6 @@ var DOM;
         return({
              touchevent:TOUCHEVENT.touchevent,
              move:DOMMOVE.startDragAndDrop, 
-             onmousewheel:DOMEVENT.onmousewheel,
              onresize:DOMEVENT.onresize,
              selection:TOOLS.selection,
         });  
