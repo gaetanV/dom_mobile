@@ -2,11 +2,21 @@
     <head>
         <title>DOM MOBILE</title>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width , initial-scale=1.0, user-scalable=no" />
+      
         <script src="../lib/DOM.js"></script>
 
         <style>
+            * {margin: 0; padding: 0;}
+            html, body {
+                overflow: hidden;
+                width:100%;
+                height: 100%;
+              overflow-x:hidden ;
+               overflow-y:hidden ;
+                position: fixed; 
+             
+            }
             #direction{
                 padding: 20px; background: blue;
                 max-width: 500px; 
@@ -16,12 +26,13 @@
             }
 
             #test{
+            
                 background: #eee;
                 padding: 50px;
                 position: absolute;
                 margin: 50px;
                 cursor: pointer;
-                border:#ccc 1px solid;
+           
             }
             #test2{
 
@@ -53,12 +64,19 @@
 
         <div id="test" >
             MOVE ME
-            <div id="test2" >
+            
+           <div id="test2" >
                 CLICK ME
 
             </div>
+          
+          
         </div>
-
+        
+        
+        
+ 
+      
         <script>
             DOM.selection(false);
             var click = function (e) {
@@ -88,7 +106,7 @@
             }
 
             var touchY = function (e) {
-
+                
                 function callback(dom) {
                     document.querySelector("#vitesseY").innerHTML = dom.vitesse.y;
                 }
@@ -127,8 +145,10 @@
                 document.querySelector("#direction").innerHTML = "click";
 
             }
-            
-            
+         
+           
+
+      
             document.querySelector("#direction").touchevent('touchY', moveXY);
             document.querySelector("#direction").touchevent('touchX', moveXY);
             document.querySelector("#test2").touchevent('scrollUp', scrollUp);
@@ -140,7 +160,7 @@
             document.querySelector("#test").touchevent('touchY', touchY);
             document.querySelector("#test").touchevent('touchX', touchX);
             
-              document.querySelector("#test").touchevent('click', clickBox);
+        //  document.querySelector("#test").touchevent('click', clickBox);
         </script>
     </body>
 </html>

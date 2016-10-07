@@ -29,7 +29,7 @@ var DOM;
         
         var param={
            
-            fps:60,
+            fps:30,
             timeLongclick:400,//@Time to determinate when is a longClick
             timeDbclick:200,
         }
@@ -72,10 +72,10 @@ var DOM;
                 return {
                     target:e.target,
                     timeStart:getTime(),
-                    mouseStart:{x:e.clientX,y:e.clientY},
+                    mouseStart:{x:TOOLS.touchPos(e).x,y:TOOLS.touchPos(e).y},
                     vitesse:{x:0,y:0},
                     origin:e.target,
-                    mouseEnd:{x:e.clientX,y:e.clientY},
+                    mouseEnd:{x:TOOLS.touchPos(e).x,y:TOOLS.touchPos(e).y},
                     etat:name
                 };
             };
@@ -100,7 +100,9 @@ var DOM;
                    },
                    mousemove:function(e){
                          var d=dom.click;
-                        if(Math.abs(e.clientX-d.mouseStart.x)>4||Math.abs(e.clientY-d.mouseStart.y)>4){
+  
+                        if(Math.abs(TOOLS.touchPos(e).x-d.mouseStart.x)>4||Math.abs(e.clientY-d.mouseStart.y)>4){
+                            
                             TOUCHEVENT.stopFindYourWay(e);
                          }
                    },
@@ -181,7 +183,7 @@ var DOM;
 
         
             var stopFindYourWay=function(e){
-               var direction=Math.abs(e.clientX-dom.click.mouseStart.x)>Math.abs(e.clientY-dom.click.mouseStart.y);
+               var direction=Math.abs(TOOLS.touchPos(e).x-dom.click.mouseStart.x)>Math.abs(TOOLS.touchPos(e).y-dom.click.mouseStart.y);
                dom.move=false;
                if(direction){
                   
@@ -275,28 +277,31 @@ var DOM;
                     }
                  },
                  mousemove:function(e){
-                     
+                        
                         var d=dom.dragAndDrop;
-                        if(!d.mouse){d.mouse={x:e.clientX,y:e.clientY}}
+                        var pos=TOOLS.touchPos(e);
+                        if(!d.mouse){
+                             d.mouse=pos;
+                        }
                         var x=d.posStart.x;
                         var y=d.posStart.y;
                          
                         switch(d.way){  
                             case "-x":
-                                x+=(d.mouse.x-e.clientX)*d.speed;  
+                                x+=(d.mouse.x-pos.x)*d.speed;  
                                 break;
                             case "x":
-                                x-=(d.mouse.x-e.clientX)*d.speed;  
+                                x-=(d.mouse.x-pos.x)*d.speed;  
                                 break;
                             case "-y":
-                                y+=(d.mouse.y-e.clientY)*d.speed;  
+                                y+=(d.mouse.y-pos.y)*d.speed;  
                                 break;
                              case "y":
-                                y-=(d.mouse.y-e.clientY)*d.speed;  
+                                y-=(d.mouse.y-pos.y)*d.speed;  
                                 break;
                              case "xy":
-                                x-=(d.mouse.x-e.clientX)*d.speed; 
-                                y-=(d.mouse.y-e.clientY)*d.speed;  
+                                x-=(d.mouse.x-pos.x)*d.speed; 
+                                y-=(d.mouse.y-pos.y)*d.speed;  
                                 
                                 break;
                         }   
@@ -313,11 +318,12 @@ var DOM;
                 dom.move="dragAndDrop";
                 
                 var position = TOOLS.getOffset(domNode);
+              
                 domNode.style.transition="none";
                 dom.dragAndDrop&&(stopDragAndDrop());
                 
                 var computedStyle = window.getComputedStyle(domNode); 
-         
+                
                 dom.dragAndDrop={
                     timeStart:getTime(),
                     timeEnd:getTime()+1,
@@ -375,6 +381,16 @@ var DOM;
          }();
          
          var TOOLS=function(){
+              var touchPos =function(e){
+                  if (e.targetTouches) {
+                            if(e.targetTouches.length == 1){
+                                  var touch = e.targetTouches[0];
+                                  return{x:touch.pageX,y:touch.pageY};
+                              }
+                   }else{
+                                 return{x:e.clientX,y:e.clientY};
+                  }
+              } 
               var findParent = function(n,param){
                           while(n!=null){
                               if(n.ref && typeof n.ref[param]==='function'){return n }
@@ -447,6 +463,7 @@ var DOM;
                     var marginLeft=parseInt(computedStyle.marginLeft, 10);;
                     var borderLeft=parseInt(computedStyle.borderLeftWidth, 10);
                     w += borderLeft + marginLeft;
+                
                     return {
                         left: bc.left + window.scrollX-marginLeft-borderLeft,
                         top: bc.top + window.scrollY-marginTop-borderTop,
@@ -460,6 +477,7 @@ var DOM;
                   jQueryToNatif:jQueryToNatif,
                   isInPage:isInPage,
                   findParent:findParent,
+                  touchPos:touchPos,
              }
          }();   
   
@@ -525,19 +543,39 @@ var DOM;
         }();
     
   
-  
+        function is_touch_device() {
+            return 'ontouchstart' in window     
+                || navigator.maxTouchPoints;       
+        };
         setInterval(EVENT.refresh,param.fps);
         //@DOM EVENT 
         window.addEventListener("resize",EVENT.resize);
         document.addEventListener((/Firefox/i.test(navigator.userAgent))? "DOMMouseScroll" : "mousewheel",EVENT.mousewheel);
-        document.addEventListener("mouseup",EVENT.mouseup);
-        document.addEventListener("mousemove",EVENT.mousemove);
-        document.addEventListener("mousedown",EVENT.click);
-        document.addEventListener('mouseout', function(e) {
-          if (e.toElement == null && e.relatedTarget == null) {
-              EVENT.mouseup(e);
-          }
-        });
+  
+       
+       // document.addEventListener("touchcancel",EVENT.mouseup);
+     
+        
+        if(is_touch_device()){
+             document.addEventListener("touchstart",EVENT.click);
+             document.addEventListener("touchmove",EVENT.mousemove);
+             document.addEventListener("touchend",EVENT.mouseup);
+                 document.addEventListener("touchleave",EVENT.mouseup);
+        }else{
+             document.addEventListener("mousedown",EVENT.click);
+             document.addEventListener("mousemove",EVENT.mousemove);
+            document.addEventListener("mouseup",EVENT.mouseup);
+            document.addEventListener('mouseout', function(e) {
+             if (e.toElement == null && e.relatedTarget == null) {
+                 EVENT.mouseup(e);
+             }
+            });
+      
+        }
+       
+
+    
+        
         
         
   
@@ -546,6 +584,8 @@ var DOM;
              move:DOMMOVE.startDragAndDrop, 
              onresize:DOMEVENT.onresize,
              selection:TOOLS.selection,
+             debug:function(){return dom.click},
+       
         });  
     }();
     
