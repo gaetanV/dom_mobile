@@ -80,13 +80,7 @@ var DOM;
                 };
             };
             var domEvents={
-                   refresh:function(){
-                       if(dom.click&&dom.click.etat=="click"){
-                           if(getTime()>dom.click.timeStart+param.timeLongclick){
-                                  TOUCHEVENT.startLongClick();         
-                           }
-                       }
-                   },
+                 
                    click : function (e){   
                         if(dom.click.etat==="waitclick"){
                             TOUCHEVENT.stopDbClick();
@@ -94,6 +88,7 @@ var DOM;
                         }else{
                            dom.move="whereYouGo";
                            dom.click=newevent(e,"click");
+                           setTimeout(function(){ TOUCHEVENT.startLongClick() ; }, param.timeLongclick);
                         }
                        
 
@@ -111,9 +106,8 @@ var DOM;
                                 TOUCHEVENT.stopLongClick();
                         }
                         if(dom.click.etat=="click"){
-                             
-                              var node=dom.click.target;
-                                  dom.click.etat="waitclick";
+                               var node=dom.click.target;
+                               dom.click.etat="waitclick";
                                if(node.ref && typeof node.ref.dbclick==='function'){ 
                                 
                                     setTimeout(function(){ TOUCHEVENT.stopClick() ; }, param.timeDbclick);
@@ -164,14 +158,14 @@ var DOM;
              
             }
             var startLongClick =function(){
-               var node=dom.click.target;
-               dom.click.etat="longclick";
-               if(node.ref && typeof node.ref.longclick==='function'){
-                   dom.move="longclick";
-                   node.ref.longclick(dom.click); 
-                   
-               
-                }
+               if(dom.click&&dom.click.etat=="click"){
+                    var node=dom.click.target;
+                    dom.click.etat="longclick";
+                    if(node.ref && typeof node.ref.longclick==='function'){
+                        dom.move="longclick";
+                        node.ref.longclick(dom.click); 
+                    }
+              }
             }
             var stopLongClick =function(){
                 var node=dom.click.target;
@@ -268,22 +262,45 @@ var DOM;
          var DOMMOVE=function(){
              var domEvents={
                  refresh:function(){
-                      
-                    var dm=dom.dragAndDrop;
-                    if(dm.refresh){    
-                            dm.dom.style.left= dm.posEnd.x;
-                            dm.dom.style.top= dm.posEnd.y;
-                            dm.refresh=false;
+              
+                    var d=dom.dragAndDrop;
+                    if(d.refresh){  
+                            var pos=TOOLS.touchPos(d.refresh);
+                            var x=d.posStart.x;
+                            var y=d.posStart.y;
+                            switch(d.way){  
+                                case "-x":
+                                    x+=(d.mouse.x-pos.x)*d.speed;  
+                                    break;
+                                case "x":
+                                    x-=(d.mouse.x-pos.x)*d.speed;  
+                                    break;
+                                case "-y":
+                                    y+=(d.mouse.y-pos.y)*d.speed;  
+                                    break;
+                                 case "y":
+                                    y-=(d.mouse.y-pos.y)*d.speed;  
+                                    break;
+                                 case "xy":
+                                    x-=(d.mouse.x-pos.x)*d.speed; 
+                                    y-=(d.mouse.y-pos.y)*d.speed;  
+                                    break;
+                            }   
+                            
+                            d.posEnd={y:y,x:x};
+                            d.dom.style.left= d.posEnd.x;
+                            d.dom.style.top= d.posEnd.y;
+                            d.refresh=false;
                     }
                  },
                  mousemove:function(e){
-                        
+                    
                         var d=dom.dragAndDrop;
-                        var pos=TOOLS.touchPos(e);
+                       // var pos=TOOLS.touchPos(e);
                         if(!d.mouse){
-                             d.mouse=pos;
+                             d.mouse=TOOLS.touchPos(e);
                         }
-                        var x=d.posStart.x;
+                      /*  var x=d.posStart.x;
                         var y=d.posStart.y;
                          
                         switch(d.way){  
@@ -305,9 +322,10 @@ var DOM;
                                 
                                 break;
                         }   
-                         
-                        d.refresh=true;
-                        d.posEnd={y:y,x:x};
+                     
+                        d.refresh=e;
+                        d.posEnd={y:y,x:x};*/
+                       d.refresh=e;
                        
                  },
                  mouseup:function(e){
@@ -359,15 +377,10 @@ var DOM;
                 var x= Math.abs(domObj.posStart.x-domObj.posEnd.x);
                 var y= Math.abs(domObj.posStart.y-domObj.posEnd.y);
                 domObj.vitesse={x:1/(time*1/x),y:1/(time*1/y)}; 
-            
-                
                 dom.dragAndDrop.dom.style.zIndex=domObj.css.zIndex;
                 dom.dragAndDrop.dom.style.position=domObj.css.position;
-             
                 domObj.callback(domObj);
                 dom.dragAndDrop=false;
-             
-               
             }
              
              return{
@@ -485,7 +498,7 @@ var DOM;
         var EVENT=function(){
             //@FRAME REFRESH 
             var refresh = function(){ 
-                TOUCHEVENT.refresh();
+                //TOUCHEVENT.refresh();
                 DOMMOVE.refresh();
             }
             var click = function (e){     
@@ -552,33 +565,22 @@ var DOM;
         window.addEventListener("resize",EVENT.resize);
         document.addEventListener((/Firefox/i.test(navigator.userAgent))? "DOMMouseScroll" : "mousewheel",EVENT.mousewheel);
   
-       
-       // document.addEventListener("touchcancel",EVENT.mouseup);
-     
-        
         if(is_touch_device()){
              document.addEventListener("touchstart",EVENT.click);
              document.addEventListener("touchmove",EVENT.mousemove);
              document.addEventListener("touchend",EVENT.mouseup);
-                 document.addEventListener("touchleave",EVENT.mouseup);
+             document.addEventListener("touchleave",EVENT.mouseup);
         }else{
              document.addEventListener("mousedown",EVENT.click);
              document.addEventListener("mousemove",EVENT.mousemove);
-            document.addEventListener("mouseup",EVENT.mouseup);
-            document.addEventListener('mouseout', function(e) {
+             document.addEventListener("mouseup",EVENT.mouseup);
+             document.addEventListener('mouseout', function(e) {
              if (e.toElement == null && e.relatedTarget == null) {
                  EVENT.mouseup(e);
              }
             });
-      
         }
-       
-
-    
         
-        
-        
-  
         return({
              touchevent:TOUCHEVENT.touchevent,
              move:DOMMOVE.startDragAndDrop, 
