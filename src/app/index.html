@@ -44,7 +44,9 @@
                 min-width: 250px;
                 cursor: pointer;
             }
-
+            #vitesseY{
+                background:red;
+            }
         </style>
     </head>
     <body>
@@ -55,11 +57,11 @@
 
         </div>
         Vitesse Y
-        <div id="vitesseY">
+        <div id="vitesseY" draggable="true" ondragstart="drag(event)">
             0
 
         </div>
-        <div id="direction">
+        <div id="direction" >
             0
 
         </div>
@@ -80,6 +82,12 @@
  
       
         <script>
+            
+            function drag(ev) {
+                console.log("test");
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+            
             DOM.selection(false);
             var click = function (e) {
                 e.target.innerHTML = "CLICK A LONG TIME";

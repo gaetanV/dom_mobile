@@ -268,6 +268,7 @@ var DOM;
                             var pos=TOOLS.touchPos(d.refresh);
                             var x=d.posStart.x;
                             var y=d.posStart.y;
+                             
                             switch(d.way){  
                                 case "-x":
                                     x+=(d.mouse.x-pos.x)*d.speed;  
@@ -286,10 +287,14 @@ var DOM;
                                     y-=(d.mouse.y-pos.y)*d.speed;  
                                     break;
                             }   
-                            
+                          
                             d.posEnd={y:y,x:x};
-                            d.dom.style.left= d.posEnd.x;
-                            d.dom.style.top= d.posEnd.y;
+                              //transform: translate(609.717px, -41.0167px);
+                              var t="translate("+d.posEnd.x+"px ,"+d.posEnd.y+"px) ";
+                            
+                            d.dom.style.transform = t;
+                           // d.dom.style.left= d.posEnd.x;
+                           // d.dom.style.top= d.posEnd.y;
                             d.refresh=false;
                     }
                  },
@@ -334,9 +339,11 @@ var DOM;
              }
              var startDragAndDrop=function(domNode,way,speed,callback){
                 dom.move="dragAndDrop";
-                
-                var position = TOOLS.getOffset(domNode);
               
+  
+  
+                var transform = TOOLS.getTransform(domNode);
+                
                 domNode.style.transition="none";
                 dom.dragAndDrop&&(stopDragAndDrop());
                 
@@ -352,19 +359,19 @@ var DOM;
                        position:computedStyle.position,
                        zIndex:computedStyle.zIndex,
                     },
-                    posEnd:{x:position.left ,y:position.top  },
-                    posStart:{x:position.left ,y:position.top  },
+                    posEnd:{x:transform.x ,y:transform.y  },
+                    posStart:{x:transform.x ,y:transform.y  },
                     way:way,
                     callback:callback,
                     refresh:false,
                 };
                 if(computedStyle.position!=="absolute"||computedStyle.position!=="fixed"){
-                    dom.dragAndDrop.dom.style.width=position.inner.width+"px";
+                  /*  dom.dragAndDrop.dom.style.width=position.inner.width+"px";
                     dom.dragAndDrop.dom.style.top=position.top+"px";
                     dom.dragAndDrop.dom.style.left=position.left+"px";
                     dom.dragAndDrop.dom.style.height=position.inner.height+"px";
                     dom.dragAndDrop.dom.style.position="absolute";
-                    dom.dragAndDrop.dom.style.zIndex="200";
+                    dom.dragAndDrop.dom.style.zIndex="200";*/
                 }
               
             }
@@ -452,11 +459,35 @@ var DOM;
                 return false;
 
              }
-      
-            var getOffset =function (node) {          
+            var getTransform=function(node){
+                   var computedStyle = window.getComputedStyle(node); 
+                    var transformX=0;
+                    var transformY=0;
+                     var t=computedStyle.transform;
+                    if(t!="none"){
+                        var re = /\((.*)\)/
+    
+                        var pos = re.exec(computedStyle.transform);
+                        var matrix= pos[1].split(",");
+                        transformX=matrix[4];
+                        transformY=matrix[5];
+                      
+                     }
+                     return  {x:transformX,y:transformY};
+                     
+            }
+            var getOffset =function (node) {    
+                    //
+                   // 
+                 
                     var e=jQueryToNatif(node);
                     var bc = e.getBoundingClientRect();
                      var computedStyle = window.getComputedStyle(node); 
+                    
+                     
+                 
+                   
+                 
                      var paddingTop=parseInt(computedStyle.paddingTop, 10);
                      var paddingBottom=parseInt(computedStyle.paddingBottom, 10);
                     var paddingLeft=parseInt(computedStyle.paddingLeft, 10);
@@ -480,6 +511,7 @@ var DOM;
                     return {
                         left: bc.left + window.scrollX-marginLeft-borderLeft,
                         top: bc.top + window.scrollY-marginTop-borderTop,
+ 
                         outer:{height:h,width:w},
                         inner:{height:e.clientHeight-(paddingTop+paddingBottom),width:e.clientWidth-(paddingRight+paddingLeft)}
                     }
@@ -491,6 +523,7 @@ var DOM;
                   isInPage:isInPage,
                   findParent:findParent,
                   touchPos:touchPos,
+                  getTransform:getTransform,
              }
          }();   
   
