@@ -477,25 +477,14 @@ var DOM;
                      
             }
             var getOffset =function (node) {    
-                    //
-                   // 
-                 
                     var e=jQueryToNatif(node);
                     var bc = e.getBoundingClientRect();
-                     var computedStyle = window.getComputedStyle(node); 
-                    
-                     
-                 
-                   
-                 
-                     var paddingTop=parseInt(computedStyle.paddingTop, 10);
-                     var paddingBottom=parseInt(computedStyle.paddingBottom, 10);
+                    var computedStyle = window.getComputedStyle(node); 
+                    var paddingTop=parseInt(computedStyle.paddingTop, 10);
+                    var paddingBottom=parseInt(computedStyle.paddingBottom, 10);
                     var paddingLeft=parseInt(computedStyle.paddingLeft, 10);
-                     var paddingRight=parseInt(computedStyle.paddingRight, 10);
-                    
-                    
+                    var paddingRight=parseInt(computedStyle.paddingRight, 10);
                     var h = e.clientHeight;
-                   
                     var marginTop=parseInt(computedStyle.marginTop, 10);
                     var borderTop=parseInt(computedStyle.borderTopWidth, 10)
                     h += marginTop+borderTop;
@@ -507,11 +496,9 @@ var DOM;
                     var marginLeft=parseInt(computedStyle.marginLeft, 10);;
                     var borderLeft=parseInt(computedStyle.borderLeftWidth, 10);
                     w += borderLeft + marginLeft;
-                
                     return {
                         left: bc.left + window.scrollX-marginLeft-borderLeft,
-                        top: bc.top + window.scrollY-marginTop-borderTop,
- 
+                        top: bc.top + window.scrollY-marginTop-borderTop, 
                         outer:{height:h,width:w},
                         inner:{height:e.clientHeight-(paddingTop+paddingBottom),width:e.clientWidth-(paddingRight+paddingLeft)}
                     }

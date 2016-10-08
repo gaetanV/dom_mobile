@@ -25,6 +25,7 @@
                 margin:0 auto;
                 color:#fff;
                 text-align: center;
+         
             }
 
             #test{
@@ -57,7 +58,7 @@
 
         </div>
         Vitesse Y
-        <div id="vitesseY" draggable="true" ondragstart="drag(event)">
+        <div id="vitesseY">
             0
 
         </div>
@@ -82,12 +83,7 @@
  
       
         <script>
-            
-            function drag(ev) {
-                console.log("test");
-            ev.dataTransfer.setData("text", ev.target.id);
-        }
-            
+
             DOM.selection(false);
             var click = function (e) {
                 e.target.innerHTML = "CLICK A LONG TIME";
