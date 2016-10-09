@@ -66,6 +66,7 @@ var DOM;
                 }
             },
             mousewheel: function (e) {
+                parseEvent(e);
                 for (var i in events.mousewheel) {
                     events.mousewheel[i](e);
                 }

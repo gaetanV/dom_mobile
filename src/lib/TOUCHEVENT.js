@@ -21,6 +21,8 @@
  *         dbclick
  *         scrollUp
  *         scrollDown
+ *         resizeX
+ *         resizeY
  *  @param callback{function} 
  *  @exemple : dom.touchevent('dbclick', dbclick);
  *
@@ -226,7 +228,7 @@
                 }
             },
             mousewheel: function (e) {
-
+           
                  if (!event) {
                     event = new EVENT(e);
                     event.etat = "scroll";
