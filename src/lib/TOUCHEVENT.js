@@ -1,29 +1,65 @@
+/**
+ *  lib/TOUCHEVENT.js
+ *  This file is part of the DOM MOBILE package.
+ *  
+ * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
+ *  V 0.1.0
+ *  
+ *  09/10/2016 
+ ***
+ *
+ *  #touchevent
+ *  @target dom | jQueryDom
+ *  @syntax  dom.touchevent {function}  
+ *  @param eventname{string} 
+ *       - Same for MOUSE & TOUCH 
+ *         click
+ *         longclick
+ *         longclickup
+ *         touchX
+ *         touchY
+ *         dbclick
+ *         scrollUp
+ *         scrollDown
+ *  @param callback{function} 
+ *  @exemple : dom.touchevent('dbclick', dbclick);
+ *
+ **/
 (function () {
     'use strict';
     var EVENT = function (e) {
         this.target = e.target;
         this.timeStart = DOM.getTime();
-        this.mouseStart = {x: DOM.TOOLS.touchPos(e).x, y: DOM.TOOLS.touchPos(e).y};
+        this.mouseStart = {x: e.touch.x, y: e.touch.y};
         this.vitesse = {x: 0, y: 0};
         this.origin = e.target;
-        this.mouseEnd = {x: DOM.TOOLS.touchPos(e).x, y: DOM.TOOLS.touchPos(e).y},
+        this.mouseEnd = {x: e.touch.x, y: e.touch.y},
         this.etat = "init";
     }
 
     var TOUCHEVENT = function () {
-        
         var param = {
             timeLongclick: 400, //@Time to determinate when is a longClick
             timeDbclick: 200, //@Time to determinate when is a dbclick
             debug:false,
         }
         var event = false;
-        
+        var memwindow= {x: window.innerWidth, y: window.innerHeight};
         var trace=function(value){
             if(param.debug){
                 console.log(value);
             }
-        }
+        };
+        
+         var findParent = function (n, param) {
+                while (n != null) {
+                    if (n.ref && typeof n.ref[param] === 'function') {
+                        return n
+                    }
+                    var n = n.parentNode;
+                }
+                return false;
+        };
         /**
          -------------------------
          @INIT                   : (touchdown)=> click.etat="init" 
@@ -51,12 +87,12 @@
         DOM.extendDOM(
                 {
                     touchevent: function (eventname, callback) {
-                        var e = DOM.TOOLS.jQueryToNatif(this);
+                        var e = this.toNatif();
                         var affectEvent = function (event, callback) {
                             if (typeof callback !== 'function')
                                 throw("callback need to be a function");
 
-                            if (!DOM.TOOLS.isInPage(e))
+                            if (!e.inPage())
                                 throw("We can't register a event on a dom not in body");
                             if (!e.ref)
                                 e.ref = {};
@@ -92,12 +128,46 @@
                             case "scrollDown":
                                 affectEvent("scrollDown", callback);
                                 break;
+                            case "resizeX":
+                                affectEvent("resizeX", callback);
+                                 e.addClass("resizeX");
+                                break;
+                            case "resizeY":
+                                affectEvent("resizeY", callback);
+                                e.addClass("resizeY");
+                                break;
                         }
                     },
                 }
         );
         DOM.extendEVENT({
+            resize:function(e){
+                var w = {x: window.innerWidth, y: window.innerHeight};
+                if (w.x !==memwindow.x) { 
+                    memwindow.x = w.x;
+                    var cible=document.querySelectorAll(".resizeX");
+                     for(var i=0; i<cible.length;i++){
+                        var node=cible[i];
+                        if (node.ref && typeof node.ref.resizeX === 'function') {
+                            node.ref.resizeX(event);
+                        }
+                    }
+                }
+                if (w.y !==memwindow.y) { 
+                    memwindow.y = w.y;
+                    var cible=document.querySelectorAll(".resizeY");
+                     for(var i=0; i<cible.length;i++){
+                         var node=cible[i];
+                        if (node.ref && typeof node.ref.resizeY === 'function') {
+                            node.ref.resizeY(event);
+                        }
+                      
+                      
+                    }
+                }  
+            },
             click: function (e) {
+               
                 if (!event) {
                     trace("init");
                     event = new EVENT(e);
@@ -113,9 +183,10 @@
               
             },
              mousemove: function (e) {
+               
                 if (event) {
                     if(event.etat==="init"){
-                       if (Math.abs(DOM.TOOLS.touchPos(e).x - event.mouseStart.x) > 4 || Math.abs(e.clientY - event.mouseStart.y) > 4) {
+                       if (Math.abs(e.touch.x - event.mouseStart.x) > 4 || Math.abs(e.clientY - event.mouseStart.y) > 4) {
                            EVENTTOUCH.stopFindYourWay(e);
                        } 
                     }
@@ -155,12 +226,11 @@
                 }
             },
             mousewheel: function (e) {
-               
+
                  if (!event) {
                     event = new EVENT(e);
                     event.etat = "scroll";
                     e.detail > 0 ? EVENTTOUCH.stopScrollDown() : EVENTTOUCH.stopScrollUp();
-                    
                     if (event.etat == "scrollUp"||event.etat == "scrollDown") {
                        
                         e.preventDefault();
@@ -174,7 +244,7 @@
         var EVENTTOUCH  ={ 
             stopScrollUp : function () {
                 if(event&&event.etat === "scroll"){
-                    var parent = DOM.TOOLS.findParent(event.target, "scrollUp");
+                    var parent = findParent(event.target, "scrollUp");
                     if (parent) {
                         event.target = parent;
                         event.etat = "scrollUp";
@@ -184,7 +254,7 @@
             },
            stopScrollDown : function () {
                 if(event&&event.etat === "scroll"){
-                    var parent = DOM.TOOLS.findParent(event.target, "scrollDown");
+                    var parent = findParent(event.target, "scrollDown");
                     if (parent) {
                         event.target = parent;
                         event.etat = "scrollDown";
@@ -257,19 +327,19 @@
              stopFindYourWay : function (e) {
                  if(event){
                     if (event.etat === "init") {
-                        var direction = Math.abs(DOM.TOOLS.touchPos(e).x - event.mouseStart.x) > Math.abs(DOM.TOOLS.touchPos(e).y - event.mouseStart.y);
+                        var direction = Math.abs(e.touch.x - event.mouseStart.x) > Math.abs(e.touch.y - event.mouseStart.y);
                   
                         if (direction) {
                             event.etat = "moveX";
                             trace("moveX");
-                            var parent = DOM.TOOLS.findParent(e.target, "touchX");
+                            var parent = findParent(e.target, "touchX");
                             if (parent) {
                                 parent.ref.touchX(event);
                             }
                         } else {
                             event.etat = "moveY";
                             trace("moveY");
-                            var parent = DOM.TOOLS.findParent(e.target, "touchY");
+                            var parent = findParent(e.target, "touchY");
                             if (parent) {
                                 parent.ref.touchY(event);
                             }
@@ -283,6 +353,4 @@
         }
 
     }();
-
-
 })();
