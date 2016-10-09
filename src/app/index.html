@@ -3,13 +3,11 @@
         <title>DOM MOBILE</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width , initial-scale=1.0, user-scalable=no" />
-      
         <script src="../lib/DOM.js"></script>
-
+        <script src="../lib/MOVE.js"></script>
+        <script src="../lib/TOUCHEVENT.js"></script>
         <style>
-            * {margin: 0; padding: 0;-webkit-tap-highlight-color: rgba(0, 0, 0, 0); }
-           
-           
+            * {margin: 0; padding: 0;-webkit-tap-highlight-color: rgba(0, 0, 0, 0); }          
             html, body {
                 overflow: hidden;
                 width:100%;
@@ -29,25 +27,24 @@
             }
 
             #test{
-            
+               transition: all 0.2s linear;
                 background: #eee;
                 padding: 50px;
                 position: absolute;
                 margin: 50px;
                 cursor: pointer;
-           
+                 border:#ddd solid 10px;
+               
             }
             #test2{
 
                 background: white;
                 padding: 50px;
-                border:solid 1px;
+               
                 min-width: 250px;
                 cursor: pointer;
             }
-            #vitesseY{
-                background:red;
-            }
+     
         </style>
     </head>
     <body>
@@ -55,33 +52,21 @@
         Vitesse X
         <div id="vitesseX">
             0
-
         </div>
         Vitesse Y
         <div id="vitesseY">
             0
-
         </div>
         <div id="direction" >
             0
-
         </div>
 
         <div id="test" >
             MOVE ME
-            
            <div id="test2" >
                 CLICK ME
-
             </div>
-          
-          
         </div>
-        
-        
-        
- 
-      
         <script>
 
             DOM.selection(false);
@@ -134,9 +119,11 @@
             var scrollUp = function (e) {
                 e.target.innerHTML = "SCROLL UP";
                 document.querySelector("#direction").innerHTML = "scrollUp";
+                   document.querySelector("#test").style.top= parseInt(document.querySelector("#test").style.top)-50+'px';
 
             }
             var scrollDown = function (e) {
+                    document.querySelector("#test").style.top= parseInt(document.querySelector("#test").style.top)+50+'px';
                 e.target.innerHTML = "SCROLL DOWN";
                 document.querySelector("#direction").innerHTML = "scrollDown";
 
@@ -160,12 +147,14 @@
             document.querySelector("#test2").touchevent('scrollUp', scrollUp);
             document.querySelector("#test2").touchevent('scrollDown', scrollDown);
             document.querySelector("#test2").touchevent('click', click);
-            document.querySelector("#test2").touchevent('longclick', longclick);
+         
             document.querySelector("#test2").touchevent('dbclick', dbclick);
+            
+               document.querySelector("#test2").touchevent('longclick', longclick);
             document.querySelector("#test2").touchevent('longclickup', longclickup);
             document.querySelector("#test").touchevent('touchY', touchY);
             document.querySelector("#test").touchevent('touchX', touchX);
-            
+        
         //  document.querySelector("#test").touchevent('click', clickBox);
         </script>
     </body>
