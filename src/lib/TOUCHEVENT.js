@@ -174,7 +174,6 @@
                 }
             },
             click: function (e) {
-
                 if (!event) {
                     trace("init");
                     event = new EVENT(e);
@@ -190,7 +189,6 @@
                         EVENTTOUCH.stopDbClick();
                     }
                 }
-
             },
             mousemove: function (e) {
 
@@ -216,16 +214,11 @@
                             EVENTTOUCH.stopLongClick();
                             break;
                         case "init":
-                            var node = event.target;
-
-
-                            if (node[refDom] && typeof node[refDom].dbclick === 'function') {
+                            var parent = findParent(event.target, "dbclick");
+                            if (parent) {
                                 trace("waitclick");
                                 event.etat = "waitclick";
-                                if (timeout) {
-                                    clearTimeout(timeout);
-                                }
-
+                                if (timeout) { clearTimeout(timeout);}
                                 timeout = setTimeout(function () {
                                     if (event.etat === "waitclick") {
                                         EVENTTOUCH.stopClick();
@@ -284,10 +277,12 @@
                     if (event.etat === "init") {
 
                         var node = event.target;
-                        if (node[refDom] && typeof node[refDom].longclick === 'function') {
+                        var parent = findParent(event.target, "longclick");
+                        if (parent) {
                             event.etat = "waitlongclick";
                             trace("waitlongclick");
                             node[refDom].longclick(event);
+                            event.target=parent;
                         }
 
                     }
@@ -314,8 +309,10 @@
                     if (event.etat === "init" || event.etat === "waitclick") {
                         event.etat = "click"
                         trace("click");
+                        
                         var node = event.target;
-                        if (node[refDom] && typeof node[refDom].click === 'function') {
+                        var parent = findParent(event.target, "click");
+                        if (parent) {
                             node[refDom].click(event);
                         }
                     }
@@ -331,7 +328,8 @@
                         event.etat = "dbclick"
                         trace("dbclick");
                         var node = event.target;
-                        if (node[refDom] && typeof node[refDom].dbclick === 'function') {
+                         var parent = findParent(event.target, "dbclick");
+                         if (parent) {
                             node[refDom].dbclick(event);
                         }
                         event = false;

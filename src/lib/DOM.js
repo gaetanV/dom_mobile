@@ -12,7 +12,7 @@ var DOM;
     'use strict';
     DOM = function () {
         var param = {
-            fps: 30,
+            fps: 24,
         }
         var events = {
             mouseup: [],
@@ -34,6 +34,9 @@ var DOM;
             }
         };
         var EVENT = {
+             /**
+             * @Correct (Bug display css transform)
+             **/
             refresh: function () {
                 for (var i in events.refresh) {
                     events.refresh[i]();
