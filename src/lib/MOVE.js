@@ -3,9 +3,9 @@
  *  This file is part of the DOM MOBILE package.
  *  
  * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
- *  V 0.1.0
+ *  V 0.2.0
  *  
- *  09/10/2016 
+ *  10/10/2016 
  ***
  *
  *  #move
@@ -24,67 +24,52 @@
 (function () {
     'use strict';
     var PATH = function (dom,way,speed,callback) {
-        var computedStyle = window.getComputedStyle(dom);
-     
-        
-        var matrix = [1, 0, 0, 1, 0, 0];
+
+        var matrix = [1, 0, 0, 1, 0, 0],
+            time= performance.now(),
+            computedStyle = window.getComputedStyle(dom)
+        ;
         var t = computedStyle.transform;
-        if (t != "none") {
-            var re = /\((.*)\)/
-            var pos = re.exec(computedStyle.transform);
+        if (t != "none") { 
+            var pos = /\((.*)\)/.exec(t);
             matrix = pos[1].split(",");
-        }
-        this.timeStart = DOM.getTime();
-        this.timeEnd = DOM.getTime();
-        this.speed = speed;
+        };
         this.matrix=matrix;
+        this.timeStart =time;
+        this.timeEnd = time;
+        this.speed = speed;
         this.dom=dom;
-      
-        
-        
         this.css = {
-            transform: computedStyle.transform,
             transitionDuration: computedStyle.transitionDuration,
             transitionProperty: computedStyle.transitionProperty,
             transitionDelay: computedStyle.transitionDelay,
         }
-         dom.style.transition="none";
-       
+        dom.style.transition="none";
         var transform = dom.getTransform();
+        var x=parseInt(dom.style.left);
+        var y=parseInt(dom.style.top);
         if(transform.y!==0|| transform.x!==0){
-             dom.offsetHeight; // REFRESH STYLE
-             if(transform.y!==0){
-                 dom.style.top = parseInt(dom.style.top) + transform.y + "px";
-            }
-            
-             if(transform.x!==0){
-                dom.style.left = parseInt(dom.style.left) + transform.x + "px";
-            }
-             
+            dom.offsetHeight; // REFRESH STYLE
+            if(transform.y!==0){ dom.style.top = y + transform.y + "px";}
+            if(transform.x!==0){dom.style.left = x + transform.x + "px";}   
         }
-  
-        this.css.top=computedStyle.top;
         this.css.left=computedStyle.left;
- 
-
-        
+        this.css.top=computedStyle.top;
         this.transform={
             start:{x: 0, y: 0},
             end:{x: 0, y:0},    
         }
         this.pos={
-            start:{x: 0, y: 0},
-            end:{x: 0, y:0}, 
+            start:{x: x, y: y},
+            end:{x: x, y: y},
         }
         this.way=way  ; 
         this.callback=callback;
-        this.refresh=false ;  
-   
-      
+        this.refresh=false ;   
     }
+    
     var MOVE = function () {
         var event = false;
-   
         DOM.extendDOM(
                 {
                     move: function ( way, speed, callback) {
@@ -147,12 +132,10 @@
 
         var EVENTMOVE = {
             stopDragAndDrop : function () {
-             
                 event.pos.end = {x: parseInt(event.css.left) + event.transform.end.x, y: parseInt(event.css.top) + event.transform.end.y};  
-                event.timeEnd = DOM.getTime();
+                event.timeEnd = performance.now()
                 var computedStyle = window.getComputedStyle(event.dom);
-                var d = event;
-                d.dom.style.transform = "matrix(" + d.matrix[0] + "," + d.matrix[1] + "," + d.matrix[2] + "," + d.matrix[3] + ",0,0)";
+                event.dom.style.transform = "matrix(" + event.matrix[0] + "," + event.matrix[1] + "," + event.matrix[2] + "," + event.matrix[3] + ",0,0)";
                 if (computedStyle.position == "absolute" || computedStyle.position == "fixed" || computedStyle.position == "relative") {
                     event.dom.style.top = parseInt(event.css.top) + event.transform.end.y + "px";
                     event.dom.style.left = parseInt(event.css.left) + event.transform.end.x + "px";
@@ -161,11 +144,11 @@
                 var x = Math.abs(event.transform.end.x);
                 var y = Math.abs(event.transform.end.y);
                 event.vitesse = {x: 1 / (time * 1 / x), y: 1 / (time * 1 / y)};
-                event.callback(event);
                 event.dom.offsetHeight; // REFRESH STYLE
                 event.dom.style.transitionDuration = event.css.transitionDuration;
                 event.dom.style.transitionProperty = event.css.transitionProperty;
                 event.dom.style.transitionDelay = event.css.transitionDelay;
+                event.callback(event);
                 event=false;
                 
             }

@@ -6,22 +6,14 @@ var DOM;
  * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
  *  V 0.3.0
  *  
- *  09/10/2016 
+ *  10/10/2016 
  **/
 (function () {
     'use strict';
-
     DOM = function () {
         var param = {
-            touch: 'ontouchstart' in window || navigator.maxTouchPoints,
-            jQuery: false,
             fps: 30,
         }
-        if (typeof jQuery !== 'undefined') {
-            param.jQuery = true;
-        } else {
-            console.log("WORK WITHOUT JQUERY BUT IT'S COMPATIBLE");
-        };
         var events = {
             mouseup: [],
             click: [],
@@ -31,8 +23,9 @@ var DOM;
             resize: [],
         }
         var parseEvent = function (e) {
+            
             if (e.targetTouches) {
-                if (e.targetTouches.length == 1) {
+                if (e.targetTouches.length === 1) {
                     var touch = e.targetTouches[0];
                     e.touch = {x: touch.pageX, y: touch.pageY};
                 }
@@ -54,12 +47,14 @@ var DOM;
                 return false;
             },
             resize: function (e) {
+                parseEvent(e);
                 for (var i in events.resize) {
                     events.resize[i](e);
                 }
                 return false;
             },
             mousemove: function (e) {
+                
                 parseEvent(e);
                 for (var i in events.mousemove) {
                     events.mousemove[i](e);
@@ -78,11 +73,11 @@ var DOM;
                 }
             }
         };
+        
         setInterval(EVENT.refresh, param.fps);
-        //@DOM EVENT 
         window.addEventListener("resize", EVENT.resize);
         document.addEventListener((/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel", EVENT.mousewheel);
-        if (param.touch) {
+        if ('ontouchstart' in window || navigator.maxTouchPoints) {
             document.addEventListener("touchstart", EVENT.click);
             document.addEventListener("touchmove", EVENT.mousemove);
             document.addEventListener("touchend", EVENT.mouseup);
@@ -96,57 +91,44 @@ var DOM;
                     EVENT.mouseup(e);
                 }
             });
-            //document.querySelector("*").onmousedown=function() {return false;} //NO SELECT
-
         }
-        var extendDOM = function (fngroup) {
-            if (param.jQuery) {
-                jQuery.fn.extend(fngroup);
-            }
-            for (var i in fngroup) {
-                    HTMLElement.prototype[i] = fngroup[i];
-            }
-          
-        }
-        var extendEVENT = function (fngroup) {
-            for (var i in fngroup) {
-                switch (i) {
-                    default:
-                        throw(i + " is not a known extendEVENT");
-                        break;
-                    case "click":
-                        events.click.push(fngroup[i]);
-                        break;
-                    case "mouseup":
-                        events.mouseup.push(fngroup[i]);
-                        break;
-                    case "mousemove":
-                        events.mousemove.push(fngroup[i]);
-                        break;
-                    case "mousewheel":
-                        events.mousewheel.push(fngroup[i]);
-                        break;
-                    case "refresh":
-                        events.refresh.push(fngroup[i]);
-                        break;
-                    case "resize":
-                        events.resize.push(fngroup[i]);
-                        break;
-
-                }
-            }
-        }
-        extendDOM({
-            toNatif: function () {
-                if (typeof jQuery !== 'undefined' && this instanceof jQuery) {
-                    return this[0];
-                }
-                return this;
-            }
-        });
         return({
-            extendDOM: extendDOM,
-            extendEVENT: extendEVENT,
+            extendDOM :  function (fngroup) {
+                if(typeof jQuery !== 'undefined') {
+                    jQuery.fn.extend(fngroup);
+                }
+                for (var i in fngroup) {
+                        HTMLElement.prototype[i] = fngroup[i];
+                }
+
+            },
+            extendEVENT: function (fngroup) {
+                for (var i in fngroup) {
+                    switch (i) {
+                        default:
+                            throw(i + " is not a known extendEVENT");
+                            break;
+                        case "click":
+                            events.click.push(fngroup[i]);
+                            break;
+                        case "mouseup":
+                            events.mouseup.push(fngroup[i]);
+                            break;
+                        case "mousemove":
+                            events.mousemove.push(fngroup[i]);
+                            break;
+                        case "mousewheel":
+                            events.mousewheel.push(fngroup[i]);
+                            break;
+                        case "refresh":
+                            events.refresh.push(fngroup[i]);
+                            break;
+                        case "resize":
+                            events.resize.push(fngroup[i]);
+                            break;
+                    }
+                }
+            },
             selection: function (boolean) {
                 if (!boolean) {
                     var a = document.querySelector("*");
@@ -167,11 +149,10 @@ var DOM;
                     a.style.userSelect = "text";
                 }
             },
-            getTime: function () {
-                return performance.now()
-            },
         });
+  
     }();
+    DOM.selection(false);
 })();
 
 
