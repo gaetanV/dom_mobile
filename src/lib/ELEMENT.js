@@ -3,9 +3,9 @@
  *  This file is part of the DOM MOBILE package.
  *  
  * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
- *  V 0.1.0
+ *  V 0.2.0
  *  
- *  10/10/2016 
+ *  11/10/2016 
  ***
  **/
 (function () {
@@ -13,37 +13,37 @@
     DOM.extendDOM(
             {
                 toNatif: function () {
-                    if (typeof jQuery !== 'undefined' && this instanceof jQuery) {
-                        return this[0];
-                    }
+                    if (typeof jQuery !== 'undefined' && this instanceof jQuery) {return this[0];}
                     return this;
                 },
                 getTransform: function () {
-                    var node = this.toNatif();
-                    var computedStyle = window.getComputedStyle(node);
-                    var transformX = 0;
-                    var transformY = 0;
+                    var computedStyle = window.getComputedStyle(this.toNatif());
+                    var x = 0, y = 0;
                     var t = computedStyle.transform;
-                    if (t != "none") {
+                    if (t !== "none") {
                         var re = /\((.*)\)/
-                        var pos = re.exec(computedStyle.transform);
+                        var pos = re.exec(t);
                         var matrix = pos[1].split(",");
-                        transformX = parseInt(matrix[4]);
-                        transformY = parseInt(matrix[5]);
+                        x = parseInt(matrix[4]);
+                        y = parseInt(matrix[5]);
                     }
-                    return  {x: transformX, y: transformY};
-
+                    return  {x: x, y: y};
                 },
                 inPage: function () {
-                    var node = this.toNatif();
-                    return (node === document.body) ? false : document.body.contains(node);
+                    var n = this.toNatif();
+                    return (n === document.body) ? false : document.body.contains(n);
 
                 },
+                /********************
+                * TO DO 
+                * ANGLE TRANSFORM
+                * SCALE TRANSFORM
+                ********************/
                 getOffset: function () {
-                    var node = this.toNatif();
-                    var e = jQueryToNatif(node);
+                    var e = this.toNatif();
+        
                     var bc = e.getBoundingClientRect();
-                    var computedStyle = window.getComputedStyle(node);
+                    var computedStyle = window.getComputedStyle(e);
                     var paddingTop = parseInt(computedStyle.paddingTop, 10);
                     var paddingBottom = parseInt(computedStyle.paddingBottom, 10);
                     var paddingLeft = parseInt(computedStyle.paddingLeft, 10);
@@ -61,13 +61,6 @@
                     ;
                     var borderLeft = parseInt(computedStyle.borderLeftWidth, 10);
                     w += borderLeft + marginLeft;
-
-                    /********************
-                     * TO DO 
-                     * ANGLE TRANSFORM
-                     * SCALE TRANSFORM
-                     */
-
                     return {
                         left: bc.left + window.scrollX - marginLeft,
                         top: bc.top + window.scrollY - marginTop,
@@ -75,10 +68,9 @@
                         inner: {height: e.clientHeight - (paddingTop + paddingBottom), width: e.clientWidth - (paddingRight + paddingLeft)}
                     }
                 }
+               
             }
     );
-
-
     HTMLElement.prototype.removeClass = function (n) {
         if (typeof n === "string") {
             n = n.trim();
@@ -96,7 +88,6 @@
         } else
             return false;
     };
-
     HTMLElement.prototype.addClass = function (n) {
         if (typeof n === "string") {
             n = n.trim();
@@ -110,7 +101,6 @@
                 var nE = $b[i];
                 if (($a).indexOf(nE) === -1) {
                     $a.push(nE);
-
                 }
             }
             this.className = $a.join(" ");

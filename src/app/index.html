@@ -4,17 +4,17 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width , initial-scale=1.0, user-scalable=no" />
         <script src="./lib/DOM.js"></script>
-         <script src="./lib/jquery.min.js"></script>
+        <script src="./lib/jquery.min.js"></script>
         <style>
             * {margin: 0; padding: 0;-webkit-tap-highlight-color: rgba(0, 0, 0, 0); }          
             html, body {
                 overflow: hidden;
                 width:100%;
                 height: 100%;
-              overflow-x:hidden ;
-               overflow-y:hidden ;
+                overflow-x:hidden ;
+                overflow-y:hidden ;
                 position: fixed; 
-             
+
             }
             #direction{
                 padding: 20px; background: blue;
@@ -22,36 +22,36 @@
                 margin:0 auto;
                 color:#fff;
                 text-align: center;
-         
+
             }
 
             #test{
-               transition: all 0.2s linear, transform 1ms;
+                transition: all 0.2s linear, transform 1ms;
                 background: #eee;
                 padding: 50px;
                 position: absolute;
                 margin: 50px;
                 cursor: pointer;
-                 border:#ddd solid 10px;
-               
+                border:#ddd solid 10px;
+
             }
             #test2{
 
                 background: white;
                 padding: 50px;
-               
+
                 min-width: 250px;
                 cursor: pointer;
             }
-            
+
             .notransition {
-            -webkit-transition: none !important;
-            -moz-transition: none !important;
-            -o-transition: none !important;
-            -ms-transition: none !important;
-            transition: none !important;
-          }
-     
+                -webkit-transition: none !important;
+                -moz-transition: none !important;
+                -o-transition: none !important;
+                -ms-transition: none !important;
+                transition: none !important;
+            }
+
         </style>
     </head>
     <body>
@@ -70,7 +70,7 @@
 
         <div id="test" >
             MOVE ME
-           <div id="test2" >
+            <div id="test2" >
                 CLICK ME
             </div>
         </div>
@@ -102,7 +102,8 @@
                     document.querySelector("#vitesseY").innerHTML = dom.vitesse.y;
                 }
                 document.querySelector("#test").move("y", 1, callback);
-                document.querySelector("#direction").innerHTML = "moveY";
+         
+                
             }
             var moveXY = function (e) {
                 function callback(dom) {
@@ -114,34 +115,45 @@
             var scrollUp = function (e) {
                 e.target.innerHTML = "SCROLL UP";
                 document.querySelector("#direction").innerHTML = "scrollUp";
-                   document.querySelector("#test").style.top= parseInt(document.querySelector("#test").style.top)-50+'px';
+                document.querySelector("#test").style.top = parseInt(document.querySelector("#test").style.top) - 50 + 'px';
 
             }
             var scrollDown = function (e) {
-                    document.querySelector("#test").style.top= parseInt(document.querySelector("#test").style.top)+50+'px';
+                document.querySelector("#test").style.top = parseInt(document.querySelector("#test").style.top) + 50 + 'px';
                 e.target.innerHTML = "SCROLL DOWN";
                 document.querySelector("#direction").innerHTML = "scrollDown";
 
             }
             var dbclick = function (e) {
                 e.target.innerHTML = "DBCLICK";
-                
+
                 document.querySelector("#direction").innerHTML = "dbclick";
             }
-            var resizeX=function(e){
+            var resizeX = function (e) {
                 console.log("resizeX");
             }
-            var resizeY=function(e){
-               console.log("resizeY");
+            var resizeY = function (e) {
+                console.log("resizeY");
             }
-       
+            var zoom = function (e) {
+                 document.querySelector("#direction").innerHTML = e.d2+"  "+e.d1;
+            }
             
-      
+             var debug = function (e) {
+             
+                 document.querySelector("#direction").innerHTML = e;
+            }
+     
+        
+            document.querySelector("#test2").touchevent('zoom', zoom);
+            document.querySelector("#test2").touchevent('DEBUG',debug);
             document.querySelector("#direction").touchevent('resizeX', resizeX);
             document.querySelector("#direction").touchevent('resizeY', resizeY);
             document.querySelector("#direction").touchevent('touchY', moveXY);
             document.querySelector("#direction").touchevent('touchX', moveXY);
             document.querySelector("#test2").touchevent('scrollUp', scrollUp);
+         
+            
             document.querySelector("#test2").touchevent('scrollDown', scrollDown);
             document.querySelector("#test2").touchevent('click', click);
             document.querySelector("#test2").touchevent('dbclick', dbclick);
@@ -149,6 +161,9 @@
             document.querySelector("#test2").touchevent('longclickup', longclickup);
             document.querySelector("#test").touchevent('touchY', touchY);
             document.querySelector("#test").touchevent('touchX', touchX);
+          
+           
+           
         </script>
 
     </body>

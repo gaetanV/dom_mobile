@@ -6,7 +6,7 @@ var DOM;
  * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
  *  V 0.3.0
  *  
- *  10/10/2016 
+ *  11/10/2016 
  **/
 (function () {
     'use strict';
@@ -24,19 +24,20 @@ var DOM;
         }
         var parseEvent = function (e) {
             
-            if (e.targetTouches) {
-                if (e.targetTouches.length === 1) {
-                    var touch = e.targetTouches[0];
-                    e.touch = {x: touch.pageX, y: touch.pageY};
+            if (e.touches) {
+                var touch=e.touches[0];
+                e.touch= {x: touch.pageX, y: touch.pageY};
+                if (e.touches.length > 1) {
+                    var touch= e.touches[1];
+                    e.touch2= {x: touch.pageX, y: touch.pageY};
                 }
+                
+                
             } else {
                 e.touch = {x: e.clientX, y: e.clientY};
             }
         };
         var EVENT = {
-             /**
-             * @Correct (Bug display css transform)
-             **/
             refresh: function () {
                 for (var i in events.refresh) {
                     events.refresh[i]();
@@ -70,13 +71,12 @@ var DOM;
                 }
             },
             mouseup: function (e) {
-                parseEvent(e);
+                //parseEvent(e);
                 for (var i in events.mouseup) {
                     events.mouseup[i](e);
                 }
             }
         };
-        
         setInterval(EVENT.refresh, param.fps);
         window.addEventListener("resize", EVENT.resize);
         document.addEventListener((/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel", EVENT.mousewheel);
@@ -103,7 +103,6 @@ var DOM;
                 for (var i in fngroup) {
                         HTMLElement.prototype[i] = fngroup[i];
                 }
-
             },
             extendEVENT: function (fngroup) {
                 for (var i in fngroup) {
