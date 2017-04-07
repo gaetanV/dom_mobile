@@ -1,12 +1,5 @@
 /**
  *  lib/MOVE.js
- *  This file is part of the DOM MOBILE package.
- *  
- * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
- *  V 0.2.0
- *  
- *  11/10/2016 
- ***
  *
  *  #move
  *  @target dom | jQueryDom

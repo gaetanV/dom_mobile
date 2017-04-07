@@ -1,167 +1,183 @@
-var DOM;
+
 /**
  *  lib/DOM.js
- *  This file is part of the DOM MOBILE package.
  *  
  * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
- *  V 0.3.0
  *  
- *  11/10/2016 
  **/
-(function () {
-    'use strict';
-    DOM = function () {
-        var param = {
-            fps: 24,
-        }
-        var events = {
-            mouseup: [],
-            click: [],
-            mousemove: [],
-            mousewheel: [],
-            refresh: [],
-            resize: [],
-        }
-        var parseEvent = function (e) {
-            
-            if (e.touches) {
-                var touch=e.touches[0];
-                e.touch= {x: touch.pageX, y: touch.pageY};
-                if (e.touches.length > 1) {
-                    var touch= e.touches[1];
-                    e.touch2= {x: touch.pageX, y: touch.pageY};
-                }
-                
-                
-            } else {
-                e.touch = {x: e.clientX, y: e.clientY};
+'use strict';
+const DOM = function () {
+    
+    var domExtend = {};
+    var param = {
+        fps: 24,
+    }
+    var events = {
+        mouseup: [],
+        click: [],
+        mousemove: [],
+        mousewheel: [],
+        refresh: [],
+        resize: [],
+    }
+    var parseEvent = function (e) {
+
+        if (e.touches) {
+            var touch = e.touches[0];
+            e.touch = {x: touch.pageX, y: touch.pageY};
+            if (e.touches.length > 1) {
+                var touch = e.touches[1];
+                e.touch2 = {x: touch.pageX, y: touch.pageY};
             }
-        };
-        var EVENT = {
-            refresh: function () {
-                for (var i in events.refresh) {
-                    events.refresh[i]();
-                }
-            },
-            click: function (e) {
-                parseEvent(e);
-                for (var i in events.click) {
-                    events.click[i](e);
-                }
-                return false;
-            },
-            resize: function (e) {
-                parseEvent(e);
-                for (var i in events.resize) {
-                    events.resize[i](e);
-                }
-                return false;
-            },
-            mousemove: function (e) {
-                
-                parseEvent(e);
-                for (var i in events.mousemove) {
-                    events.mousemove[i](e);
-                }
-            },
-            mousewheel: function (e) {
-                parseEvent(e);
-                for (var i in events.mousewheel) {
-                    events.mousewheel[i](e);
-                }
-            },
-            mouseup: function (e) {
-                //parseEvent(e);
-                for (var i in events.mouseup) {
-                    events.mouseup[i](e);
-                }
-            }
-        };
-        setInterval(EVENT.refresh, param.fps);
-        window.addEventListener("resize", EVENT.resize);
-        document.addEventListener((/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel", EVENT.mousewheel);
-        if ('ontouchstart' in window || navigator.maxTouchPoints) {
-            document.addEventListener("touchstart", EVENT.click);
-            document.addEventListener("touchmove", EVENT.mousemove);
-            document.addEventListener("touchend", EVENT.mouseup);
-            document.addEventListener("touchleave", EVENT.mouseup);
+
+
         } else {
-            document.addEventListener("mousedown", EVENT.click);
-            document.addEventListener("mousemove", EVENT.mousemove);
-            document.addEventListener("mouseup", EVENT.mouseup);
-            document.addEventListener('mouseout', function (e) {
-                if (e.toElement == null && e.relatedTarget == null) {
-                    EVENT.mouseup(e);
-                }
-            });
+            e.touch = {x: e.clientX, y: e.clientY};
         }
-        return({
-            extendDOM :  function (fngroup) {
-                if(typeof jQuery !== 'undefined') {
-                    jQuery.fn.extend(fngroup);
-                }
-                for (var i in fngroup) {
-                        HTMLElement.prototype[i] = fngroup[i];
-                }
-            },
-            extendEVENT: function (fngroup) {
-                for (var i in fngroup) {
-                    switch (i) {
-                        default:
-                            throw(i + " is not a known extendEVENT");
-                            break;
-                        case "click":
-                            events.click.push(fngroup[i]);
-                            break;
-                        case "mouseup":
-                            events.mouseup.push(fngroup[i]);
-                            break;
-                        case "mousemove":
-                            events.mousemove.push(fngroup[i]);
-                            break;
-                        case "mousewheel":
-                            events.mousewheel.push(fngroup[i]);
-                            break;
-                        case "refresh":
-                            events.refresh.push(fngroup[i]);
-                            break;
-                        case "resize":
-                            events.resize.push(fngroup[i]);
-                            break;
-                    }
-                }
-            },
-            selection: function (boolean) {
-                if (!boolean) {
-                    var a = document.querySelector("*");
-                    a.style.MozUserSelect = "none";
-                    a.style.webkitUserSelect = "none";
-                    a.style.oUserSelect = "none";
-                    a.style.khtmlUserSelect = "none";
-                    a.style.msUserSelect = "none";
-                    a.style.userSelect = "none";
+    };
+    var EVENT = {
+        refresh: function () {
+            for (var i in events.refresh) {
+                events.refresh[i]();
+            }
+        },
+        click: function (e) {
+            parseEvent(e);
+            for (var i in events.click) {
+                events.click[i](e);
+            }
+            return false;
+        },
+        resize: function (e) {
+            parseEvent(e);
+            for (var i in events.resize) {
+                events.resize[i](e);
+            }
+            return false;
+        },
+        mousemove: function (e) {
 
-                } else {
-                    var a = document.querySelector("*");
-                    a.style.MozUserSelect = "text";
-                    a.style.webkitUserSelect = "text";
-                    a.style.oUserSelect = "text";
-                    a.style.khtmlUserSelect = "text";
-                    a.style.msUserSelect = "text";
-                    a.style.userSelect = "text";
-                }
-            },
+            parseEvent(e);
+            for (var i in events.mousemove) {
+                events.mousemove[i](e);
+            }
+        },
+        mousewheel: function (e) {
+            parseEvent(e);
+            for (var i in events.mousewheel) {
+                events.mousewheel[i](e);
+            }
+        },
+        mouseup: function (e) {
+            //parseEvent(e);
+            for (var i in events.mouseup) {
+                events.mouseup[i](e);
+            }
+        }
+    };
+    setInterval(EVENT.refresh, param.fps);
+    window.addEventListener("resize", EVENT.resize);
+    document.addEventListener((/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel", EVENT.mousewheel);
+    if ('ontouchstart' in window || navigator.maxTouchPoints) {
+        document.addEventListener("touchstart", EVENT.click);
+        document.addEventListener("touchmove", EVENT.mousemove);
+        document.addEventListener("touchend", EVENT.mouseup);
+        document.addEventListener("touchleave", EVENT.mouseup);
+    } else {
+        document.addEventListener("mousedown", EVENT.click);
+        document.addEventListener("mousemove", EVENT.mousemove);
+        document.addEventListener("mouseup", EVENT.mouseup);
+        document.addEventListener('mouseout', function (e) {
+            if (e.toElement === null && e.relatedTarget === null) {
+                EVENT.mouseup(e);
+            }
         });
-  
-    }();
-    DOM.selection(false);
-})();
+    }
+    var Interface = function (entity) {
+        if (entity.prototype) {
+            for (var i in domExtend) {
+                entity.prototype[i] = domExtend[i];
+            }
+        } else {
+            if(entity[0]){
+                for (var i in domExtend) {
+                    entity[0][i] = domExtend[i];
+                }
+            }
+            for (var i in domExtend) {
+                entity[i] = domExtend[i];
+            }
+        }
+        
+        return entity;
+    };
+    Interface.extendDOM = function (fngroup) {
+        for (var i in fngroup) {
+            domExtend[i] = fngroup[i];
+        }
+    };
+    Interface.extendEVENT = function (fngroup) {
+        for (var i in fngroup) {
+            switch (i) {
+                default:
+                    throw(i + " is not a known extendEVENT");
+                    break;
+                case "click":
+                    events.click.push(fngroup[i]);
+                    break;
+                case "mouseup":
+                    events.mouseup.push(fngroup[i]);
+                    break;
+                case "mousemove":
+                    events.mousemove.push(fngroup[i]);
+                    break;
+                case "mousewheel":
+                    events.mousewheel.push(fngroup[i]);
+                    break;
+                case "refresh":
+                    events.refresh.push(fngroup[i]);
+                    break;
+                case "resize":
+                    events.resize.push(fngroup[i]);
+                    break;
+            }
+        }
+    };
+    Interface.selection = function (boolean) {
+        if (!boolean) {
+            var a = document.querySelector("*");
+            a.style.MozUserSelect = "none";
+            a.style.webkitUserSelect = "none";
+            a.style.oUserSelect = "none";
+            a.style.khtmlUserSelect = "none";
+            a.style.msUserSelect = "none";
+            a.style.userSelect = "none";
 
+        } else {
+            var a = document.querySelector("*");
+            a.style.MozUserSelect = "text";
+            a.style.webkitUserSelect = "text";
+            a.style.oUserSelect = "text";
+            a.style.khtmlUserSelect = "text";
+            a.style.msUserSelect = "text";
+            a.style.userSelect = "text";
+        }
+    };
+    Interface.touch = function (obj) {
+        return obj;
 
+    }
+    Interface.extend = function (entity) {
+        if (entity === HTMLElement) {
+            for (var i in domExtend) {
+                entity.prototype[i] = domExtend[i];
+            }
+        } else {
+            if (entity.fn && entity.fn.extend) {
+                entity.fn.extend(domExtend);
+            }
 
-
-
-
-
-
-
+        }
+    }
+    return Interface;
+}();

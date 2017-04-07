@@ -1,19 +1,10 @@
-/**
- *  lib/ELEMENT.js
- *  This file is part of the DOM MOBILE package.
- *  
- * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
- *  V 0.2.0
- *  
- *  11/10/2016 
- ***
- **/
 (function () {
     'use strict';
     DOM.extendDOM(
             {
                 toNatif: function () {
-                    if (typeof jQuery !== 'undefined' && this instanceof jQuery) {return this[0];}
+                    //if (typeof jQuery !== 'undefined' && this instanceof jQuery) {return this[0];}
+                    if (this[0]) {return this[0];}
                     return this;
                 },
                 getTransform: function () {

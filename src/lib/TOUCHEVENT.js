@@ -1,12 +1,5 @@
 /**
  *  lib/TOUCHEVENT.js
- *  This file is part of the DOM MOBILE package.
- *  
- * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
- *  V 0.3.0
- *  
- *  11/10/2016 
- ***
  *
  *  #touchevent
  *  @target dom | jQueryDom
@@ -30,7 +23,7 @@
 (function () {
     'use strict';
     var timeout = false;
-    var DEBUG=false;
+    var DEBUG = false;
     var refDom = "data-touchevent";
     var param = {
         timeLongclick: 400, //@Time to determinate when is a longClick
@@ -43,22 +36,24 @@
         this.etat = "init";
         this.target = e.target;
         this.timeStart = performance.now()
-        this.mouseStart =  e.touch;
+        this.mouseStart = e.touch;
         this.mouseEnd = e.touch;
-        this.mouseStart2 =false;
-        this.mouseEnd2 =false;
-        
+        this.mouseStart2 = false;
+        this.mouseEnd2 = false;
+
         this.vitesse = {x: 0, y: 0};
         this.origin = e.target;
-   
+        if (e.touch2) {
+            event.etat = "multitouch";
+        }
         if (timeout) {
             clearTimeout(timeout);
-           
+
         }
-  
+
     }
     var trace = function (value) {
-      
+
         if (param.debug) {
             console.log(value);
         }
@@ -103,16 +98,14 @@
                     var affectEvent = function (event, callback) {
                         if (typeof callback !== 'function')
                             throw("callback need to be a function");
-
-                        if (!e.inPage())
-                            throw("We can't register a event on a dom not in body");
+                        //if (!e.inPage())    throw("We can't register a event on a dom not in body");
                         if (!e[refDom])
                             e[refDom] = {};
                         if (e[refDom][event])
                             throw("Event " + event + " is already defined");
                         e[refDom][event] = callback;
                     }
-                   
+
                     switch (eventname) {
                         default:
                             throw(eventname + "is not a known event try touchX or touchY");
@@ -153,9 +146,10 @@
                             affectEvent("zoom", callback);
                             break;
                         case "DEBUG":
-                              DEBUG=callback;
+                            DEBUG = callback;
                             break;
-                    };
+                    }
+                    ;
                 }
             }
     );
@@ -186,11 +180,11 @@
             }
         },
         click: function (e) {
-        
-            
+
+
             if (!event) {
                 trace("init");
-                
+
                 event = new EVENT(e);
                 if (event.timeout) {
                     clearTimeout(event.timeout);
@@ -204,12 +198,12 @@
                     EVENTTOUCH.stopDbClick();
                 }
                 if (event.etat === "init") {
-                    if( e.touch){
+                    if (e.touch) {
                         event.etat = "multitouch";
-                    }  
-                }      
+                    }
+                }
             }
-            
+
         },
         mousemove: function (e) {
             if (event) {
@@ -218,45 +212,39 @@
                         EVENTTOUCH.stopFindYourWay(e);
                     }
                 }
-                if (event.etat === "multitouch" || event.etat === "zoom") { 
-                        event.mouseEnd =  e.touch;
-                        event.mouseEnd2 =  e.touch2;
-                         if(!event.mouseStart2){
-                                event.mouseStart=e.touch;
-                                event.mouseStart2=e.touch2;
-                                event.d1=Math.sqrt(Math.pow(event.mouseStart.x-event.mouseStart2.x,2)+Math.pow(event.mouseStart.x-event.mouseStart2.x,2)) ;
-                         }
-                }  
-                if (event.etat === "multitouch") {   
-                    if(e.touch&&e.touch2){
-                        var parent = findParent(event.target, "zoom");
-                        if (parent) {
-                               event.etat ="zoom";
-                               event.target = parent;
+                if (event.etat === "multitouch" || event.etat === "zoom") {
+                    event.mouseEnd = e.touch;
+                    event.mouseEnd2 = e.touch2;
+                    if (!event.mouseStart2) {
+                        event.mouseStart = e.touch;
+                        event.mouseStart2 = e.touch2;
+                        event.d1 = Math.sqrt(Math.pow(event.mouseStart.x - event.mouseStart2.x, 2) + Math.pow(event.mouseStart.x - event.mouseStart2.x, 2));
+                    }
+
+                    if (event.etat === "multitouch") {
+                        if (e.touch && e.touch2) {
+                            EVENTTOUCH.startZoom();
+
                         }
-                        
-                         //DEBUG(Math.round(event.mouseStart.x)+"  "+Math.round(event.mouseEnd.x)+" || "+ Math.round(event.mouseStart2.x) +" "+  Math.round(event.mouseEnd2.x));
+                    }
+                    if (event.etat === "zoom") {
+                        EVENTTOUCH.sendZoom();
                     }
                 }
-                if (event.etat === "zoom") {
-                     EVENTTOUCH.sendZoom();     
-                }
-                
+
+
             }
         },
         mouseup: function (e) {
-            
-     
             if (event) {
-              
                 switch (event.etat) {
                     default:
                         trace("event end by mouseup");
                         event = false;
                         break;
                     case "multitouch":
-                       event=false;
-                       break;
+                        event = false;
+                        break;
                     case "waitlongclick":
                         EVENTTOUCH.stopLongClick();
                         break;
@@ -295,12 +283,22 @@
 
     });
     var EVENTTOUCH = {
-         sendZoom: function () {
+        startZoom: function () {
+            if (event && event.etat === "multitouch") {
+                var parent = findParent(event.target, "zoom");
+                if (parent) {
+                    event.etat = "zoom";
+                    event.target = parent;
+                }
+            }
+
+        },
+        sendZoom: function () {
             if (event && event.etat === "zoom") {
-                    event.d2=Math.sqrt(Math.pow(event.mouseEnd.x-event.mouseEnd2.x,2)+Math.pow(event.mouseEnd.x-event.mouseEnd2.x,2)) ;
-                    event.target[refDom].zoom(event);
-             }
-              
+                event.d2 = Math.sqrt(Math.pow(event.mouseEnd.x - event.mouseEnd2.x, 2) + Math.pow(event.mouseEnd.x - event.mouseEnd2.x, 2));
+                event.target[refDom].zoom(event);
+            }
+
         },
         stopScrollUp: function () {
             if (event && event.etat === "scroll") {
@@ -310,7 +308,7 @@
                     event.etat = "scrollUp";
                     parent[refDom].scrollUp(event);
                 }
-                  
+
             }
         },
         stopScrollDown: function () {
@@ -333,7 +331,7 @@
                     var node = event.target;
                     var parent = findParent(event.target, "longclick");
                     if (parent) {
-                       
+
                         event.etat = "waitlongclick";
                         trace("waitlongclick");
                         node[refDom].longclick(event);
@@ -368,7 +366,7 @@
                     var node = event.target;
                     var parent = findParent(event.target, "click");
                     if (parent) {
-                        node[refDom].click(event);
+                        parent[refDom].click(event);
                     }
                 }
                 event = false;
@@ -385,7 +383,7 @@
                     var node = event.target;
                     var parent = findParent(event.target, "dbclick");
                     if (parent) {
-                        node[refDom].dbclick(event);
+                        parent[refDom].dbclick(event);
                     }
                     event = false;
                 }

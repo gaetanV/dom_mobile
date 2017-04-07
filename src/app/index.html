@@ -75,6 +75,9 @@
             </div>
         </div>
         <script>
+            DOM.extend(HTMLElement);
+            DOM.extend($);
+            DOM.selection(false);
             var click = function (e) {
                 e.target.innerHTML = "CLICK A LONG TIME";
                 document.querySelector("#direction").innerHTML = "click";
@@ -102,6 +105,7 @@
                     document.querySelector("#vitesseY").innerHTML = dom.vitesse.y;
                 }
                 document.querySelector("#test").move("y", 1, callback);
+                   document.querySelector("#direction").innerHTML = "moveY";
          
                 
             }
@@ -143,8 +147,7 @@
              
                  document.querySelector("#direction").innerHTML = e;
             }
-     
-        
+   
             document.querySelector("#test2").touchevent('zoom', zoom);
             document.querySelector("#test2").touchevent('DEBUG',debug);
             document.querySelector("#direction").touchevent('resizeX', resizeX);
@@ -161,8 +164,10 @@
             document.querySelector("#test2").touchevent('longclickup', longclickup);
             document.querySelector("#test").touchevent('touchY', touchY);
             document.querySelector("#test").touchevent('touchX', touchX);
-          
-           
+            function test(){
+                console.log("test");
+            }
+            DOM($("#test")).touchevent('click', test);
            
         </script>
 
