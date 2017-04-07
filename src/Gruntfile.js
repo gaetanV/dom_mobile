@@ -3,18 +3,18 @@ module.exports = function(grunt) {
   grunt.initConfig({
     concat: {
         dest:{
-              src: ['lib/*.js'],
+             src: ['lib/DOM.js','lib/**/*.js'],
              dest: "app/lib/DOM.js",
         }
     },
     uglify: {
         dest:{
-             src: ['lib/*.js'],
+             src: ['lib/DOM.js','lib/**/*.js'],
              dest: "app/lib/DOM.js",
         }
     },
     watch: {
-      files: ['lib/*.js'],
+      files: ['lib/**/*.js'],
       tasks: ['uglify']
     }
   });
@@ -22,5 +22,4 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.registerTask('default', ['watch']);
-
 };

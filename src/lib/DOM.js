@@ -6,7 +6,7 @@
  *  
  **/
 'use strict';
-const DOM = function () {
+var DOM = function () {
     
     var domExtend = {};
     var param = {
@@ -29,8 +29,6 @@ const DOM = function () {
                 var touch = e.touches[1];
                 e.touch2 = {x: touch.pageX, y: touch.pageY};
             }
-
-
         } else {
             e.touch = {x: e.clientX, y: e.clientY};
         }
@@ -99,11 +97,6 @@ const DOM = function () {
                 entity.prototype[i] = domExtend[i];
             }
         } else {
-            if(entity[0]){
-                for (var i in domExtend) {
-                    entity[0][i] = domExtend[i];
-                }
-            }
             for (var i in domExtend) {
                 entity[i] = domExtend[i];
             }
@@ -163,10 +156,6 @@ const DOM = function () {
             a.style.userSelect = "text";
         }
     };
-    Interface.touch = function (obj) {
-        return obj;
-
-    }
     Interface.extend = function (entity) {
         if (entity === HTMLElement) {
             for (var i in domExtend) {

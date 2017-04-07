@@ -25,6 +25,8 @@
     var timeout = false;
     var DEBUG = false;
     var refDom = "data-touchevent";
+    var refResizeX = "_resizeX";
+    var refResizeY = "_resizeY";
     var param = {
         timeLongclick: 400, //@Time to determinate when is a longClick
         timeDbclick: 200, //@Time to determinate when is a dbclick
@@ -43,20 +45,12 @@
 
         this.vitesse = {x: 0, y: 0};
         this.origin = e.target;
-        if (e.touch2) {
-            event.etat = "multitouch";
-        }
-        if (timeout) {
-            clearTimeout(timeout);
-
-        }
-
+     
+        e.touch2 && ( event.etat = "multitouch" );
+        timeout && ( clearTimeout(timeout));
     }
     var trace = function (value) {
-
-        if (param.debug) {
-            console.log(value);
-        }
+        param.debug && console.log(value);
     };
     var findParent = function (n, param) {
         while (n !== null) {
@@ -94,18 +88,17 @@
     DOM.extendDOM(
             {
                 touchevent: function (eventname, callback) {
-                    var e = this.toNatif();
+                    var e = this[0]?this[0]:this;
                     var affectEvent = function (event, callback) {
                         if (typeof callback !== 'function')
                             throw("callback need to be a function");
-                        //if (!e.inPage())    throw("We can't register a event on a dom not in body");
-                        if (!e[refDom])
-                            e[refDom] = {};
+                        if (!(e === document.body ? false : document.body.contains(e)))
+                            throw("We can't register a event on a dom not in body");
+                        !e[refDom] && ( e[refDom] = {} );
                         if (e[refDom][event])
                             throw("Event " + event + " is already defined");
                         e[refDom][event] = callback;
-                    }
-
+                    } 
                     switch (eventname) {
                         default:
                             throw(eventname + "is not a known event try touchX or touchY");
@@ -136,11 +129,11 @@
                             break;
                         case "resizeX":
                             affectEvent("resizeX", callback);
-                            e.addClass("resizeX");
+                            e.setAttribute(refResizeX, true);
                             break;
                         case "resizeY":
                             affectEvent("resizeY", callback);
-                            e.addClass("resizeY");
+                            e.setAttribute(refResizeY, true);
                             break;
                         case "zoom":
                             affectEvent("zoom", callback);
@@ -149,7 +142,6 @@
                             DEBUG = callback;
                             break;
                     }
-                    ;
                 }
             }
     );
@@ -158,7 +150,7 @@
             var w = {x: window.innerWidth, y: window.innerHeight};
             if (w.x !== memwindow.x) {
                 memwindow.x = w.x;
-                var cible = document.querySelectorAll(".resizeX");
+                var cible = document.querySelectorAll("[" + refResizeX + "]");
                 for (var i = 0; i < cible.length; i++) {
                     var node = cible[i];
                     if (node[refDom] && typeof node[refDom].resizeX === 'function') {
@@ -168,71 +160,64 @@
             }
             if (w.y !== memwindow.y) {
                 memwindow.y = w.y;
-                var cible = document.querySelectorAll(".resizeY");
+                var cible = document.querySelectorAll("[" + refResizeY + "]");
                 for (var i = 0; i < cible.length; i++) {
                     var node = cible[i];
                     if (node[refDom] && typeof node[refDom].resizeY === 'function') {
                         node[refDom].resizeY(e);
                     }
-
-
                 }
             }
         },
         click: function (e) {
-
-
             if (!event) {
                 trace("init");
-
                 event = new EVENT(e);
                 if (event.timeout) {
                     clearTimeout(event.timeout);
                 }
-
                 timeout = setTimeout(function () {
                     EVENTTOUCH.startLongClick();
                 }, param.timeLongclick);
             } else {
-                if (event.etat === "waitclick") {
-                    EVENTTOUCH.stopDbClick();
-                }
-                if (event.etat === "init") {
-                    if (e.touch) {
-                        event.etat = "multitouch";
-                    }
+                switch (event.etat) {
+                    case "waitclick":
+                        EVENTTOUCH.stopDbClick();
+                        break;
+                    case "init":
+                        e.touch && (event.etat = "multitouch");
+                        break;
                 }
             }
-
         },
         mousemove: function (e) {
             if (event) {
-                if (event.etat === "init") {
-                    if (Math.abs(e.touch.x - event.mouseStart.x) > 4 || Math.abs(e.clientY - event.mouseStart.y) > 4) {
-                        EVENTTOUCH.stopFindYourWay(e);
-                    }
-                }
-                if (event.etat === "multitouch" || event.etat === "zoom") {
-                    event.mouseEnd = e.touch;
-                    event.mouseEnd2 = e.touch2;
-                    if (!event.mouseStart2) {
-                        event.mouseStart = e.touch;
-                        event.mouseStart2 = e.touch2;
-                        event.d1 = Math.sqrt(Math.pow(event.mouseStart.x - event.mouseStart2.x, 2) + Math.pow(event.mouseStart.x - event.mouseStart2.x, 2));
-                    }
-
-                    if (event.etat === "multitouch") {
-                        if (e.touch && e.touch2) {
-                            EVENTTOUCH.startZoom();
-
+                switch (event.etat) {
+                    case "init":
+                        if (Math.abs(e.touch.x - event.mouseStart.x) > 4 || Math.abs(e.clientY - event.mouseStart.y) > 4) {
+                            EVENTTOUCH.stopFindYourWay(e);
                         }
-                    }
-                    if (event.etat === "zoom") {
+                        break;
+                    case "multitouch":
+                        event.mouseEnd = e.touch;
+                        event.mouseEnd2 = e.touch2;
+                        if (!event.mouseStart2) {
+                            event.mouseStart = e.touch;
+                            event.mouseStart2 = e.touch2;
+                            event.d1 = Math.sqrt(Math.pow(event.mouseStart.x - event.mouseStart2.x, 2) + Math.pow(event.mouseStart.x - event.mouseStart2.x, 2));
+                        }
+                        e.touch && (e.touch2 && EVENTTOUCH.startZoom());
+                    case "zoom":
+                        event.mouseEnd = e.touch;
+                        event.mouseEnd2 = e.touch2;
+                        if (!event.mouseStart2) {
+                            event.mouseStart = e.touch;
+                            event.mouseStart2 = e.touch2;
+                            event.d1 = Math.sqrt(Math.pow(event.mouseStart.x - event.mouseStart2.x, 2) + Math.pow(event.mouseStart.x - event.mouseStart2.x, 2));
+                        }
                         EVENTTOUCH.sendZoom();
-                    }
+                        break;
                 }
-
-
             }
         },
         mouseup: function (e) {
@@ -265,7 +250,6 @@
                             EVENTTOUCH.stopClick();
                         }
                         break;
-
                 }
             }
         },
@@ -280,7 +264,6 @@
                 event = false;
             }
         }
-
     });
     var EVENTTOUCH = {
         startZoom: function () {
@@ -291,14 +274,12 @@
                     event.target = parent;
                 }
             }
-
         },
         sendZoom: function () {
             if (event && event.etat === "zoom") {
                 event.d2 = Math.sqrt(Math.pow(event.mouseEnd.x - event.mouseEnd2.x, 2) + Math.pow(event.mouseEnd.x - event.mouseEnd2.x, 2));
                 event.target[refDom].zoom(event);
             }
-
         },
         stopScrollUp: function () {
             if (event && event.etat === "scroll") {
@@ -308,7 +289,6 @@
                     event.etat = "scrollUp";
                     parent[refDom].scrollUp(event);
                 }
-
             }
         },
         stopScrollDown: function () {
@@ -327,11 +307,9 @@
         startLongClick: function () {
             if (event) {
                 if (event.etat === "init") {
-
                     var node = event.target;
                     var parent = findParent(event.target, "longclick");
                     if (parent) {
-
                         event.etat = "waitlongclick";
                         trace("waitlongclick");
                         node[refDom].longclick(event);
@@ -343,12 +321,10 @@
         },
         stopLongClick: function () {
             if (event) {
-                var node = event.target;
                 event.etat = "longclick";
                 trace("longclick");
-                if (node[refDom] && typeof node[refDom].longclickup === 'function') {
-                    node[refDom].longclickup(event);
-                }
+                var parent = findParent(event.target, "longclick");
+                parent && ( parent[refDom].longclickup(event) );
                 event = false;
             } else {
                 throw("stopLongClick is call without event");
@@ -362,12 +338,8 @@
                 if (event.etat === "init" || event.etat === "waitclick") {
                     event.etat = "click"
                     trace("click");
-
-                    var node = event.target;
                     var parent = findParent(event.target, "click");
-                    if (parent) {
-                        parent[refDom].click(event);
-                    }
+                    parent && ( parent[refDom].click(event) );
                 }
                 event = false;
             }
@@ -380,11 +352,8 @@
                 if (event.etat === "waitclick") {
                     event.etat = "dbclick"
                     trace("dbclick");
-                    var node = event.target;
                     var parent = findParent(event.target, "dbclick");
-                    if (parent) {
-                        parent[refDom].dbclick(event);
-                    }
+                    parent && ( parent[refDom].dbclick(event) );
                     event = false;
                 }
             }
@@ -392,22 +361,16 @@
         stopFindYourWay: function (e) {
             if (event) {
                 if (event.etat === "init") {
-                    var direction = Math.abs(e.touch.x - event.mouseStart.x) > Math.abs(e.touch.y - event.mouseStart.y);
-
-                    if (direction) {
+                    if (Math.abs(e.touch.x - event.mouseStart.x) > Math.abs(e.touch.y - event.mouseStart.y)) {
                         event.etat = "moveX";
                         trace("moveX");
                         var parent = findParent(e.target, "touchX");
-                        if (parent) {
-                            parent[refDom].touchX(event);
-                        }
+                        parent && ( parent[refDom].touchX(event) );
                     } else {
                         event.etat = "moveY";
                         trace("moveY");
                         var parent = findParent(e.target, "touchY");
-                        if (parent) {
-                            parent[refDom].touchY(event);
-                        }
+                        parent && ( parent[refDom].touchY(event) );
                     }
                     event = false;
                 }

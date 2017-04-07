@@ -17,11 +17,11 @@
     'use strict';
     var PATH = function (dom, way, speed, callback) {
         var matrix = [1, 0, 0, 1, 0, 0],
-            time = performance.now(),
-            computedStyle = window.getComputedStyle(dom);
+                time = performance.now(),
+                computedStyle = window.getComputedStyle(dom);
 
         var t = computedStyle.transform;
-        if (t != "none") {
+        if (t !== "none") {
             var pos = /\((.*)\)/.exec(t);
             matrix = pos[1].split(",");
         }
@@ -37,7 +37,7 @@
             transitionDelay: computedStyle.transitionDelay,
         }
         dom.style.transition = "none";
-        var transform = dom.getTransform();
+        var transform = getTransform(dom);
         var x = parseInt(dom.style.left);
         var y = parseInt(dom.style.top);
         if (transform.y !== 0 || transform.x !== 0) {
@@ -63,11 +63,56 @@
         this.callback = callback;
         this.refresh = false;
     }
+    var  getTransform = function (e) {
+        var computedStyle = window.getComputedStyle(e);
+        var x = 0, y = 0;
+        var t = computedStyle.transform;
+        if (t !== "none") {
+            var re = /\((.*)\)/
+            var pos = re.exec(t);
+            var matrix = pos[1].split(",");
+            x = parseInt(matrix[4]);
+            y = parseInt(matrix[5]);
+        }
+        return  {x: x, y: y};
+    }
+    /********************
+     * TO DO 
+     * ANGLE TRANSFORM
+     * SCALE TRANSFORM
+     ********************/
+    var getOffset = function(e) {
+        var bc = e.getBoundingClientRect();
+        var computedStyle = window.getComputedStyle(e);
+        var paddingTop = parseInt(computedStyle.paddingTop, 10);
+        var paddingBottom = parseInt(computedStyle.paddingBottom, 10);
+        var paddingLeft = parseInt(computedStyle.paddingLeft, 10);
+        var paddingRight = parseInt(computedStyle.paddingRight, 10);
+        var h = e.clientHeight;
+        var marginTop = parseInt(computedStyle.marginTop, 10);
+        var borderTop = parseInt(computedStyle.borderTopWidth, 10)
+        h += marginTop + borderTop;
+        h += parseInt(computedStyle.borderBottomWidth, 10);
+        h += parseInt(computedStyle.marginBottom, 10);
+        var w = e.clientWidth;
+        w += parseInt(computedStyle.marginRight, 10);
+        w += parseInt(computedStyle.borderRightWidth, 10);
+        var marginLeft = parseInt(computedStyle.marginLeft, 10);
+        ;
+        var borderLeft = parseInt(computedStyle.borderLeftWidth, 10);
+        w += borderLeft + marginLeft;
+        return {
+            left: bc.left + window.scrollX - marginLeft,
+            top: bc.top + window.scrollY - marginTop,
+            outer: {height: h, width: w},
+            inner: {height: e.clientHeight - (paddingTop + paddingBottom), width: e.clientWidth - (paddingRight + paddingLeft)}
+        }
+    }
     var event = false;
     DOM.extendDOM(
             {
                 move: function (way, speed, callback) {
-                    var e = this.toNatif();
+                    var e = this[0] ? this[0] : this;
                     event = new PATH(e, way, speed, callback);
                 }
             }
@@ -125,18 +170,17 @@
             event.timeEnd = performance.now()
             var computedStyle = window.getComputedStyle(event.dom);
             event.dom.style.transform = "matrix(" + event.matrix[0] + "," + event.matrix[1] + "," + event.matrix[2] + "," + event.matrix[3] + ",0,0)";
-            if (computedStyle.position == "absolute" || computedStyle.position == "fixed" || computedStyle.position == "relative") {
-                if(event.css.top=="auto"){
-                     event.css.top=event.dom.getOffset().top;
+            if (computedStyle.position === "absolute" || computedStyle.position === "fixed" || computedStyle.position === "relative") {
+                if (event.css.top === "auto") {
+                    event.css.top = getOffset(event.dom).top;
                 }
-                if(event.css.left=="auto"){
-                    event.css.left=event.dom.getOffset().left;
+                if (event.css.left === "auto") {
+                    event.css.left = getOffset(event.dom).left;
                 }
-           
                 event.dom.style.top = parseInt(event.css.top) + event.transform.end.y + "px";
                 event.dom.style.left = parseInt(event.css.left) + event.transform.end.x + "px";
             }
-            
+
             var time = event.timeEnd - event.timeStart;
             var x = Math.abs(event.transform.end.x);
             var y = Math.abs(event.transform.end.y);
@@ -147,7 +191,6 @@
             event.dom.style.transitionDelay = event.css.transitionDelay;
             event.callback(event);
             event = false;
-
         }
     };
 })();

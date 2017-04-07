@@ -78,6 +78,10 @@
             DOM.extend(HTMLElement);
             DOM.extend($);
             DOM.selection(false);
+            
+     
+             
+            
             var click = function (e) {
                 e.target.innerHTML = "CLICK A LONG TIME";
                 document.querySelector("#direction").innerHTML = "click";
@@ -168,6 +172,8 @@
                 console.log("test");
             }
             DOM($("#test")).touchevent('click', test);
+            
+     
            
         </script>
 
