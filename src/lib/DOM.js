@@ -7,8 +7,10 @@
  **/
 'use strict';
 var DOM = function () {
-    
-    var domExtend = {};
+
+    var domExtend = {
+        selection: function(bool){DOM.selection(this,bool)}
+    };
     var param = {
         fps: 24,
     }
@@ -92,16 +94,9 @@ var DOM = function () {
         });
     }
     var Interface = function (entity) {
-        if (entity.prototype) {
-            for (var i in domExtend) {
-                entity.prototype[i] = domExtend[i];
-            }
-        } else {
-            for (var i in domExtend) {
-                entity[i] = domExtend[i];
-            }
+        for (var i in domExtend) {
+            entity[i] = domExtend[i];
         }
-        
         return entity;
     };
     Interface.extendDOM = function (fngroup) {
@@ -136,18 +131,16 @@ var DOM = function () {
             }
         }
     };
-    Interface.selection = function (boolean) {
+    Interface.selection = function (a, boolean) {
+        a = a[0]?a[0]:a;
         if (!boolean) {
-            var a = document.querySelector("*");
             a.style.MozUserSelect = "none";
             a.style.webkitUserSelect = "none";
             a.style.oUserSelect = "none";
             a.style.khtmlUserSelect = "none";
             a.style.msUserSelect = "none";
             a.style.userSelect = "none";
-
         } else {
-            var a = document.querySelector("*");
             a.style.MozUserSelect = "text";
             a.style.webkitUserSelect = "text";
             a.style.oUserSelect = "text";
@@ -165,7 +158,6 @@ var DOM = function () {
             if (entity.fn && entity.fn.extend) {
                 entity.fn.extend(domExtend);
             }
-
         }
     }
     return Interface;

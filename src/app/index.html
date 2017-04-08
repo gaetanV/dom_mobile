@@ -22,7 +22,7 @@
                 margin:0 auto;
                 color:#fff;
                 text-align: center;
-
+                cursor: pointer;
             }
 
             #test{
@@ -75,9 +75,10 @@
             </div>
         </div>
         <script>
+         
             DOM.extend(HTMLElement);
             DOM.extend($);
-            DOM.selection(false);
+           
             
      
              
@@ -158,9 +159,7 @@
             document.querySelector("#direction").touchevent('resizeY', resizeY);
             document.querySelector("#direction").touchevent('touchY', moveXY);
             document.querySelector("#direction").touchevent('touchX', moveXY);
-            document.querySelector("#test2").touchevent('scrollUp', scrollUp);
-         
-            
+            document.querySelector("#test2").touchevent('scrollUp', scrollUp); 
             document.querySelector("#test2").touchevent('scrollDown', scrollDown);
             document.querySelector("#test2").touchevent('click', click);
             document.querySelector("#test2").touchevent('dbclick', dbclick);
@@ -171,10 +170,14 @@
             function test(){
                 console.log("test");
             }
+        
+            var test= function(){
+               console.log("click");
+            }
             DOM($("#test")).touchevent('click', test);
-            
-     
-           
+            DOM.selection($("#test"),false);
+            DOM($("#direction")).selection(false)
+        
         </script>
 
     </body>
