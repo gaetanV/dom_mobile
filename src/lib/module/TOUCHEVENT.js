@@ -1,6 +1,4 @@
 /**
- *  lib/TOUCHEVENT.js
- *
  *  #touchevent
  *  @target dom | jQueryDom
  *  @syntax  dom.touchevent {function}  
@@ -16,6 +14,7 @@
  *         scrollDown
  *         resizeX
  *         resizeY
+ *         zoom
  *  @param callback{function} 
  *  @exemple : dom.touchevent('dbclick', dbclick);
  *
@@ -74,11 +73,18 @@
      @LONGCLICK              : (time>timeLongclick)     => click.etat="longclick"
      @MOVEX                  : (touchmove && moveX >4)  => click.etat="moveX"
      @MOVEY                  : (touchmove && moveY >4)  => click.etat="moveY"
+     @MULTITOUCH             : (e.touch)                => click.etat="multitouch"
      -------------------------
      ETAT::waitclick  
      @INIT                   :  move="waitclick"
      @DBCLICK                : (time>timeDbclick)       => click.etat="dbclick"
-     @CLICK                : (not event dbclick)        => click.etat="click" 
+     @CLICK                  : (not event dbclick)      => click.etat="click"   
+     -------------------------
+     ETAT:multitouch  
+     @ZOOM                   : (e.touch)                => click.etat="zoom"
+     -------------------------
+     ETAT:zoom  
+     @SENDZOOM               :                          => click.etat="zoom"
      -------------------------
      ETAT::longclick
      @INIT                   :  move="longclick"

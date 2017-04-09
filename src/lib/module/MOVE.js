@@ -1,12 +1,12 @@
 /**
- *  lib/MOVE.js
- *
  *  #move
  *  @target dom | jQueryDom
  *  @syntax  dom.move {function}  
  *  @param way{string} 
  *         x
+ *         -x
  *         y
+ *         -y
  *         xy
  *  @param speed{integer}        
  *  @param callback{function} 
@@ -98,7 +98,6 @@
         w += parseInt(computedStyle.marginRight, 10);
         w += parseInt(computedStyle.borderRightWidth, 10);
         var marginLeft = parseInt(computedStyle.marginLeft, 10);
-        ;
         var borderLeft = parseInt(computedStyle.borderLeftWidth, 10);
         w += borderLeft + marginLeft;
         return {
