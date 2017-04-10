@@ -1,3 +1,14 @@
+/**
+ *  @target dom | jQueryDom
+ *  @syntax  dom.resizeEvent {function}  
+ *  @param eventname{string} 
+ *       - Same for MOUSE & TOUCH 
+ *         x
+ *         y
+ *         xy
+ *  @param callback{function} 
+ *  @exemple : dom.resizeEvent('x', callback);
+ **/
 (function () {
     'use strict';
     

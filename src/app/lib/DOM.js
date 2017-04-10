@@ -210,20 +210,18 @@ DOM.register = function () {
     }
 }();
 /**
- *  #move
- *  @target dom | jQueryDom
- *  @syntax  dom.move {function}  
- *  @param way{string} 
- *         x
- *         -x
- *         y
- *         -y
- *         xy
- *  @param speed{integer}        
- *  @param callback{function} 
- *  @exemple : dom.move("xy", 1, callback);
- *  
- **/
+*  @target dom | jQueryDom
+*  @syntax  dom.move {function}  
+*  @param way{string} 
+*         x
+*         -x
+*         y
+*         -y
+*         xy
+*  @param speed{integer}        
+*  @param callback{function} 
+*  @exemple : dom.move("xy", 1, callback);
+**/
 (function () {
     'use strict';
     var PATH = function (dom, way, speed, callback) {
@@ -406,6 +404,17 @@ DOM.register = function () {
 })();
 
        
+/**
+ *  @target dom | jQueryDom
+ *  @syntax  dom.resizeEvent {function}  
+ *  @param eventname{string} 
+ *       - Same for MOUSE & TOUCH 
+ *         x
+ *         y
+ *         xy
+ *  @param callback{function} 
+ *  @exemple : dom.resizeEvent('x', callback);
+ **/
 (function () {
     'use strict';
     
@@ -457,6 +466,16 @@ DOM.register = function () {
 
 })();
 
+/**
+ *  @target dom | jQueryDom
+ *  @syntax  dom.scrollEvent {function}  
+ *  @param eventname{string} 
+ *       - Same for MOUSE & TOUCH 
+ *         up
+ *         down
+ *  @param callback{function} 
+ *  @exemple : dom.scrollEvent('up', callback);
+ **/
 (function () {
     'use strict';
     DOM.extendDOM({
@@ -485,24 +504,20 @@ DOM.register = function () {
 })();
 
 /**
- *  #touchevent
- *  @target dom | jQueryDom
- *  @syntax  dom.touchevent {function}  
- *  @param eventname{string} 
- *       - Same for MOUSE & TOUCH 
- *         click
- *         longclick
- *         longclickup
- *         touchX
- *         touchY
- *         dbclick
- *         scrollUp
- *         scrollDown
- *         zoom
- *  @param callback{function} 
- *  @exemple : dom.touchevent('dbclick', dbclick);
- *
- **/
+*  @target dom | jQueryDom
+*  @syntax  dom.touchevent {function}  
+*  @param eventname{string} 
+*       - Same for MOUSE & TOUCH 
+*         click
+*         longclick
+*         longclickup
+*         touchX
+*         touchY
+*         dbclick
+*         zoom
+*  @param callback{function} 
+*  @exemple : dom.touchevent('dbclick', dbclick);
+**/
 (function () {
     'use strict';
     var timeout = false;

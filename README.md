@@ -7,107 +7,91 @@
 
 lib/DOM.js 
 
-
-No lifecycle 
+```
 
 Single event (touch and mouse) dispatcher 
 
-```
+(click, mouseup , mousemove , mousewheel, refresh, resize)
 
-DOM($a);
-DOM(a);
+One animation tread (  24 fps )
 
-    /**
-    *   click
-    *   mouseup
-    *   mousemove
-    *   mousewheel
-    *   refresh
-    *   resize
-    **/
-One tread (  24 fps )
+/**
+* @target dom | jQueryDom
+* @exemple : DOM($dom);
+* @exemple : DOM(dom);
+*/
 
 ```
 
-lib/module/TOUCHEVENT.js
-
-Dispatch differents events on dom target selector 
-
-( resizeX - resizeY ) dispatch direct events on dom selector
+lib/module/touch_event.js
 
 ```
-    /**
-     *  #touchevent
-     *  @target dom | jQueryDom
-     *  @syntax  dom.touchevent {function}  
-     *  @param eventname{string} 
-     *       - Same for MOUSE & TOUCH 
-     *         click
-     *         longclick
-     *         longclickup
-     *         touchX
-     *         touchY
-     *         dbclick
-     *         scrollUp
-     *         scrollDown
-     *         resizeX
-     *         resizeY
-     *         zoom
-     *  @param callback{function} 
-     *  @exemple : dom.touchevent('dbclick', dbclick);
-     *
-     **/
-     -------------------------
-     @INIT                   : (touchdown)=> click.etat="init" 
-     -------------------------
-     @SCROLLUP               : (scrollup)=> click.etat="scrollUp"
-     @SCROLLDOWN             : (scrolldown)=> click.etat="scrollDown"
-     -------------------------
-     ETAT::init
-     @INIT                   :  move="whereYouGo"
-     @WAITCLICK              : (touchup)                => click.etat="waitclick"
-     @LONGCLICK              : (time>timeLongclick)     => click.etat="longclick"
-     @MOVEX                  : (touchmove && moveX >4)  => click.etat="moveX"
-     @MOVEY                  : (touchmove && moveY >4)  => click.etat="moveY"
-     @MULTITOUCH             : (e.touch)                => click.etat="multitouch"
-     -------------------------
-     ETAT::waitclick  
-     @INIT                   :  move="waitclick"
-     @DBCLICK                : (time>timeDbclick)       => click.etat="dbclick"
-     @CLICK                  : (not event dbclick)      => click.etat="click"   
-     -------------------------
-     ETAT:multitouch  
-     @ZOOM                   : (e.touch)                => click.etat="zoom"
-     -------------------------
-     ETAT:zoom  
-     @SENDZOOM               :                          => click.etat="zoom"
-     -------------------------
-     ETAT::longclick
-     @INIT                   :  move="longclick"
-     @LONGCLICKUP            : (touchup)                => click.etat="longclickup"
-     -------------------------
-     **/
+/**
+*  @target dom | jQueryDom
+*  @syntax  dom.touchevent {function}  
+*  @param eventname{string} 
+*       - Same for MOUSE & TOUCH 
+*         click
+*         longclick
+*         longclickup
+*         touchX
+*         touchY
+*         dbclick
+*         zoom
+*  @param callback{function} 
+*  @exemple : dom.touchevent('dbclick', dbclick);
+**/
+```
+
+lib/module/scroll_event.js
 
 ```
-lib/module/MOVE.js
+/**
+ *  @target dom | jQueryDom
+ *  @syntax  dom.scrollEvent {function}  
+ *  @param eventname{string} 
+ *       - Same for MOUSE & TOUCH 
+ *         up
+ *         down
+ *  @param callback{function} 
+ *  @exemple : dom.scrollEvent('up', callback);
+ **/
+```
+
+
+lib/module/resize_event.js
+
+```
+/**
+ *  @target dom | jQueryDom
+ *  @syntax  dom.resizeEvent {function}  
+ *  @param eventname{string} 
+ *       - Same for MOUSE & TOUCH 
+ *         x
+ *         y
+ *         xy
+ *  @param callback{function} 
+ *  @exemple : dom.resizeEvent('x', callback);
+ **/
+```
+
+
+lib/module/move.js
 
 CSS matrix (with speed analysis)
 
 ```
-    /**
-     *  #move
-     *  @target dom | jQueryDom
-     *  @syntax  dom.move {function}  
-     *  @param way{string} 
-     *         x
-     *         -x
-     *         y
-     *         -y
-     *         xy
-     *  @param speed{integer}        
-     *  @param callback{function} 
-     *  @exemple : dom.move("xy", 1, callback);
-     *  
-     **/
-
+/**
+*  @target dom | jQueryDom
+*  @syntax  dom.move {function}  
+*  @param way{string} 
+*         x
+*         -x
+*         y
+*         -y
+*         xy
+*  @param speed{integer}        
+*  @param callback{function} 
+*  @exemple : dom.move("xy", 1, callback);
+**/
 ```

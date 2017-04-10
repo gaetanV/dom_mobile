@@ -1,3 +1,13 @@
+/**
+ *  @target dom | jQueryDom
+ *  @syntax  dom.scrollEvent {function}  
+ *  @param eventname{string} 
+ *       - Same for MOUSE & TOUCH 
+ *         up
+ *         down
+ *  @param callback{function} 
+ *  @exemple : dom.scrollEvent('up', callback);
+ **/
 (function () {
     'use strict';
     DOM.extendDOM({

@@ -1,18 +1,16 @@
 /**
- *  #move
- *  @target dom | jQueryDom
- *  @syntax  dom.move {function}  
- *  @param way{string} 
- *         x
- *         -x
- *         y
- *         -y
- *         xy
- *  @param speed{integer}        
- *  @param callback{function} 
- *  @exemple : dom.move("xy", 1, callback);
- *  
- **/
+*  @target dom | jQueryDom
+*  @syntax  dom.move {function}  
+*  @param way{string} 
+*         x
+*         -x
+*         y
+*         -y
+*         xy
+*  @param speed{integer}        
+*  @param callback{function} 
+*  @exemple : dom.move("xy", 1, callback);
+**/
 (function () {
     'use strict';
     var PATH = function (dom, way, speed, callback) {

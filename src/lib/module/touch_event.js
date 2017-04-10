@@ -1,22 +1,18 @@
 /**
- *  #touchevent
- *  @target dom | jQueryDom
- *  @syntax  dom.touchevent {function}  
- *  @param eventname{string} 
- *       - Same for MOUSE & TOUCH 
- *         click
- *         longclick
- *         longclickup
- *         touchX
- *         touchY
- *         dbclick
- *         scrollUp
- *         scrollDown
- *         zoom
- *  @param callback{function} 
- *  @exemple : dom.touchevent('dbclick', dbclick);
- *
- **/
+*  @target dom | jQueryDom
+*  @syntax  dom.touchevent {function}  
+*  @param eventname{string} 
+*       - Same for MOUSE & TOUCH 
+*         click
+*         longclick
+*         longclickup
+*         touchX
+*         touchY
+*         dbclick
+*         zoom
+*  @param callback{function} 
+*  @exemple : dom.touchevent('dbclick', dbclick);
+**/
 (function () {
     'use strict';
     var timeout = false;
