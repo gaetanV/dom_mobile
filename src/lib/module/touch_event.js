@@ -12,8 +12,6 @@
  *         dbclick
  *         scrollUp
  *         scrollDown
- *         resizeX
- *         resizeY
  *         zoom
  *  @param callback{function} 
  *  @exemple : dom.touchevent('dbclick', dbclick);
@@ -24,15 +22,12 @@
     var timeout = false;
     var DEBUG = false;
     var refDom = "data-touchevent";
-    var refResizeX = "_resizeX";
-    var refResizeY = "_resizeY";
     var param = {
         timeLongclick: 400, //@Time to determinate when is a longClick
         timeDbclick: 200, //@Time to determinate when is a dbclick
         debug: false,
     }
     var event = false;
-    var memwindow = {x: window.innerWidth, y: window.innerHeight};
     var EVENT = function (e) {
         this.etat = "init";
         this.target = e.target;
@@ -63,9 +58,6 @@
     /**
      -------------------------
      @INIT                   : (touchdown)=> click.etat="init" 
-     -------------------------
-     @SCROLLUP               : (scrollup)=> click.etat="scrollUp"
-     @SCROLLDOWN             : (scrolldown)=> click.etat="scrollDown"
      -------------------------
      ETAT::init
      @INIT                   :  move="whereYouGo"
@@ -127,20 +119,6 @@
                         case "dbclick":
                             affectEvent("dbclick", callback);
                             break;
-                        case "scrollUp":
-                            affectEvent("scrollUp", callback);
-                            break;
-                        case "scrollDown":
-                            affectEvent("scrollDown", callback);
-                            break;
-                        case "resizeX":
-                            affectEvent("resizeX", callback);
-                            e.setAttribute(refResizeX, true);
-                            break;
-                        case "resizeY":
-                            affectEvent("resizeY", callback);
-                            e.setAttribute(refResizeY, true);
-                            break;
                         case "zoom":
                             affectEvent("zoom", callback);
                             break;
@@ -152,29 +130,6 @@
             }
     );
     DOM.extendEVENT({
-        resize: function (e) {
-            var w = {x: window.innerWidth, y: window.innerHeight};
-            if (w.x !== memwindow.x) {
-                memwindow.x = w.x;
-                var cible = document.querySelectorAll("[" + refResizeX + "]");
-                for (var i = 0; i < cible.length; i++) {
-                    var node = cible[i];
-                    if (node[refDom] && typeof node[refDom].resizeX === 'function') {
-                        node[refDom].resizeX(e);
-                    }
-                }
-            }
-            if (w.y !== memwindow.y) {
-                memwindow.y = w.y;
-                var cible = document.querySelectorAll("[" + refResizeY + "]");
-                for (var i = 0; i < cible.length; i++) {
-                    var node = cible[i];
-                    if (node[refDom] && typeof node[refDom].resizeY === 'function') {
-                        node[refDom].resizeY(e);
-                    }
-                }
-            }
-        },
         click: function (e) {
             if (!event) {
                 trace("init");
@@ -258,17 +213,6 @@
                         break;
                 }
             }
-        },
-        mousewheel: function (e) {
-            if (!event) {
-                event = new EVENT(e);
-                event.etat = "scroll";
-                e.detail > 0 ? EVENTTOUCH.stopScrollDown() : EVENTTOUCH.stopScrollUp();
-                if (event.etat === "scrollUp" || event.etat === "scrollDown") {
-                    e.preventDefault();
-                }
-                event = false;
-            }
         }
     });
     var EVENTTOUCH = {
@@ -285,26 +229,6 @@
             if (event && event.etat === "zoom") {
                 event.d2 = Math.sqrt(Math.pow(event.mouseEnd.x - event.mouseEnd2.x, 2) + Math.pow(event.mouseEnd.x - event.mouseEnd2.x, 2));
                 event.target[refDom].zoom(event);
-            }
-        },
-        stopScrollUp: function () {
-            if (event && event.etat === "scroll") {
-                var parent = findParent(event.target, "scrollUp");
-                if (parent) {
-                    event.target = parent;
-                    event.etat = "scrollUp";
-                    parent[refDom].scrollUp(event);
-                }
-            }
-        },
-        stopScrollDown: function () {
-            if (event && event.etat === "scroll") {
-                var parent = findParent(event.target, "scrollDown");
-                if (parent) {
-                    event.target = parent;
-                    event.etat = "scrollDown";
-                    parent[refDom].scrollDown(event);
-                }
             }
         },
         /***

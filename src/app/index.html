@@ -155,12 +155,14 @@
    
             document.querySelector("#test2").touchevent('zoom', zoom);
             document.querySelector("#test2").touchevent('DEBUG',debug);
-            document.querySelector("#direction").touchevent('resizeX', resizeX);
-            document.querySelector("#direction").touchevent('resizeY', resizeY);
+            
+            document.querySelector("#direction").resizeEvent('x', resizeX);
+            document.querySelector("#direction").resizeEvent('y', resizeY);
+            
             document.querySelector("#direction").touchevent('touchY', moveXY);
             document.querySelector("#direction").touchevent('touchX', moveXY);
-            document.querySelector("#test2").touchevent('scrollUp', scrollUp); 
-            document.querySelector("#test2").touchevent('scrollDown', scrollDown);
+            document.querySelector("#test2").scrollEvent('up', scrollUp); 
+            document.querySelector("#test2").scrollEvent('down', scrollDown);
             document.querySelector("#test2").touchevent('click', click);
             document.querySelector("#test2").touchevent('dbclick', dbclick);
             document.querySelector("#test2").touchevent('longclick', longclick);
