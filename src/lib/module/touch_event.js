@@ -39,21 +39,12 @@
 
         this.vitesse = {x: 0, y: 0};
         this.origin = e.target;
-     
-        e.touch2 && ( event.etat = "multitouch" );
-        timeout && ( clearTimeout(timeout));
+
+        e.touch2 && (event.etat = "multitouch");
+        timeout && (clearTimeout(timeout));
     }
     var trace = function (value) {
         param.debug && console.log(value);
-    };
-    var findParent = function (n, param) {
-        while (n !== null) {
-            if (n[refDom] && typeof n[refDom][param] === 'function') {
-                return n
-            }
-            var n = n.parentNode;
-        }
-        return false;
     };
     /**
      -------------------------
@@ -86,41 +77,31 @@
     DOM.extendDOM(
             {
                 touchevent: function (eventname, callback) {
-                    var e = this[0]?this[0]:this;
-                    var affectEvent = function (event, callback) {
-                        if (typeof callback !== 'function')
-                            throw("callback need to be a function");
-                        if (!(e === document.body ? false : document.body.contains(e)))
-                            throw("We can't register a event on a dom not in body");
-                        !e[refDom] && ( e[refDom] = {} );
-                        if (e[refDom][event])
-                            throw("Event " + event + " is already defined");
-                        e[refDom][event] = callback;
-                    } 
+                    var e = this[0] ? this[0] : this;  
                     switch (eventname) {
                         default:
                             throw(eventname + "is not a known event try touchX or touchY");
                             break;
                         case "click":
-                            affectEvent("click", callback);
+                            DOM.register.setReference(e, "click", callback);
                             break;
                         case "longclick":
-                            affectEvent("longclick", callback);
+                            DOM.register.setReference(e, "longclick", callback);
                             break;
                         case "longclickup":
-                            affectEvent("longclickup", callback);
+                            DOM.register.setReference(e, "longclickup", callback);
                             break;
                         case "touchX":
-                            affectEvent("touchX", callback);
+                            DOM.register.setReference(e, "touchX", callback);
                             break;
                         case "touchY":
-                            affectEvent("touchY", callback);
+                            DOM.register.setReference(e, "touchY", callback);
                             break;
                         case "dbclick":
-                            affectEvent("dbclick", callback);
+                            DOM.register.setReference(e, "dbclick", callback);
                             break;
                         case "zoom":
-                            affectEvent("zoom", callback);
+                            DOM.register.setReference(e, "zoom", callback);
                             break;
                         case "DEBUG":
                             DEBUG = callback;
@@ -195,10 +176,12 @@
                         EVENTTOUCH.stopLongClick();
                         break;
                     case "init":
-                        var parent = findParent(event.target, "dbclick");
+                        var parent = DOM.register.findEvent(event.target, "dbclick");
+                        
                         if (parent) {
                             trace("waitclick");
                             event.etat = "waitclick";
+                            event.traget = parent;
                             if (timeout) {
                                 clearTimeout(timeout);
                             }
@@ -218,17 +201,13 @@
     var EVENTTOUCH = {
         startZoom: function () {
             if (event && event.etat === "multitouch") {
-                var parent = findParent(event.target, "zoom");
-                if (parent) {
-                    event.etat = "zoom";
-                    event.target = parent;
-                }
+                DOM.register.emitEvent(event.target, "zoom",event);
             }
         },
         sendZoom: function () {
             if (event && event.etat === "zoom") {
                 event.d2 = Math.sqrt(Math.pow(event.mouseEnd.x - event.mouseEnd2.x, 2) + Math.pow(event.mouseEnd.x - event.mouseEnd2.x, 2));
-                event.target[refDom].zoom(event);
+                DOM.register.emitEvent(event.target, "zoom",event);
             }
         },
         /***
@@ -237,15 +216,13 @@
         startLongClick: function () {
             if (event) {
                 if (event.etat === "init") {
-                    var node = event.target;
-                    var parent = findParent(event.target, "longclick");
-                    if (parent) {
-                        event.etat = "waitlongclick";
-                        trace("waitlongclick");
-                        node[refDom].longclick(event);
-                        event.target = parent;
-                    }
-
+                    var parent = DOM.register.findEvent(event.target,"longclick",event);
+                    if(parent){
+                         DOM.register.emitEvent(event.target,"longclick",event);
+                         event.target = parent;
+                         trace("waitlongclick");
+                         event.etat = "waitlongclick";
+                    };
                 }
             }
         },
@@ -253,8 +230,7 @@
             if (event) {
                 event.etat = "longclick";
                 trace("longclick");
-                var parent = findParent(event.target, "longclick");
-                parent && ( parent[refDom].longclickup(event) );
+                DOM.register.emitEvent(event.target, "longclickup",event);
                 event = false;
             } else {
                 throw("stopLongClick is call without event");
@@ -268,8 +244,7 @@
                 if (event.etat === "init" || event.etat === "waitclick") {
                     event.etat = "click"
                     trace("click");
-                    var parent = findParent(event.target, "click");
-                    parent && ( parent[refDom].click(event) );
+                    DOM.register.emitEvent(event.target, "click",event);
                 }
                 event = false;
             }
@@ -282,8 +257,7 @@
                 if (event.etat === "waitclick") {
                     event.etat = "dbclick"
                     trace("dbclick");
-                    var parent = findParent(event.target, "dbclick");
-                    parent && ( parent[refDom].dbclick(event) );
+                    DOM.register.emitEvent(event.target, "dbclick",event);
                     event = false;
                 }
             }
@@ -294,13 +268,11 @@
                     if (Math.abs(e.touch.x - event.mouseStart.x) > Math.abs(e.touch.y - event.mouseStart.y)) {
                         event.etat = "moveX";
                         trace("moveX");
-                        var parent = findParent(e.target, "touchX");
-                        parent && ( parent[refDom].touchX(event) );
+                        DOM.register.emitEvent(event.target, "touchX",event);
                     } else {
                         event.etat = "moveY";
                         trace("moveY");
-                        var parent = findParent(e.target, "touchY");
-                        parent && ( parent[refDom].touchY(event) );
+                        DOM.register.emitEvent(event.target, "touchY",event);
                     }
                     event = false;
                 }

@@ -1,1 +1,768 @@
-"use strict";var DOM=function(){var a={selection:function(a){DOM.selection(this,a)}},b={fps:24},c={mouseup:[],click:[],mousemove:[],mousewheel:[],refresh:[],resize:[]},d=function(a){if(a.touches){var b=a.touches[0];if(a.touch={x:b.pageX,y:b.pageY},a.touches.length>1){var b=a.touches[1];a.touch2={x:b.pageX,y:b.pageY}}}else a.touch={x:a.clientX,y:a.clientY}},e={refresh:function(){for(var a in c.refresh)c.refresh[a]()},click:function(a){d(a);for(var b in c.click)c.click[b](a);return!1},resize:function(a){d(a);for(var b in c.resize)c.resize[b](a);return!1},mousemove:function(a){d(a);for(var b in c.mousemove)c.mousemove[b](a)},mousewheel:function(a){d(a);for(var b in c.mousewheel)c.mousewheel[b](a)},mouseup:function(a){for(var b in c.mouseup)c.mouseup[b](a)}};setInterval(e.refresh,b.fps),window.addEventListener("resize",e.resize),document.addEventListener(/Firefox/i.test(navigator.userAgent)?"DOMMouseScroll":"mousewheel",e.mousewheel),"ontouchstart"in window||navigator.maxTouchPoints?(document.addEventListener("touchstart",e.click),document.addEventListener("touchmove",e.mousemove),document.addEventListener("touchend",e.mouseup),document.addEventListener("touchleave",e.mouseup)):(document.addEventListener("mousedown",e.click),document.addEventListener("mousemove",e.mousemove),document.addEventListener("mouseup",e.mouseup),document.addEventListener("mouseout",function(a){null===a.toElement&&null===a.relatedTarget&&e.mouseup(a)}));var f=function(b){for(var c in a)b[c]=a[c];return b};return f.extendDOM=function(b){for(var c in b)a[c]=b[c]},f.extendEVENT=function(a){for(var b in a)switch(b){default:throw b+" is not a known extendEVENT";case"click":c.click.push(a[b]);break;case"mouseup":c.mouseup.push(a[b]);break;case"mousemove":c.mousemove.push(a[b]);break;case"mousewheel":c.mousewheel.push(a[b]);break;case"refresh":c.refresh.push(a[b]);break;case"resize":c.resize.push(a[b])}},f.selection=function(a,b){a=a[0]?a[0]:a,b?(a.style.MozUserSelect="text",a.style.webkitUserSelect="text",a.style.oUserSelect="text",a.style.khtmlUserSelect="text",a.style.msUserSelect="text",a.style.userSelect="text"):(a.style.MozUserSelect="none",a.style.webkitUserSelect="none",a.style.oUserSelect="none",a.style.khtmlUserSelect="none",a.style.msUserSelect="none",a.style.userSelect="none")},f.extend=function(b){if(b===HTMLElement)for(var c in a)b.prototype[c]=a[c];else b.fn&&b.fn.extend&&b.fn.extend(a)},f}();!function(){var a=function(a,c,d,e){var f=[1,0,0,1,0,0],g=performance.now(),h=window.getComputedStyle(a),i=h.transform;if("none"!==i){var j=/\((.*)\)/.exec(i);f=j[1].split(",")}this.matrix=f,this.timeStart=g,this.timeEnd=g,this.speed=d,this.dom=a,this.css={transitionDuration:h.transitionDuration,transitionProperty:h.transitionProperty,transitionDelay:h.transitionDelay},a.style.transition="none";var k=b(a),l=parseInt(a.style.left),m=parseInt(a.style.top);0===k.y&&0===k.x||(a.offsetHeight,0!==k.y&&(a.style.top=m+k.y+"px"),0!==k.x&&(a.style.left=l+k.x+"px")),this.css.left=h.left,this.css.top=h.top,this.transform={start:{x:0,y:0},end:{x:0,y:0}},this.pos={start:{x:l,y:m},end:{x:l,y:m}},this.way=c,this.callback=e,this.refresh=!1},b=function(a){var b=window.getComputedStyle(a),c=0,d=0,e=b.transform;if("none"!==e){var f=/\((.*)\)/,g=f.exec(e),h=g[1].split(",");c=parseInt(h[4]),d=parseInt(h[5])}return{x:c,y:d}},c=function(a){var b=a.getBoundingClientRect(),c=window.getComputedStyle(a),d=parseInt(c.paddingTop,10),e=parseInt(c.paddingBottom,10),f=parseInt(c.paddingLeft,10),g=parseInt(c.paddingRight,10),h=a.clientHeight,i=parseInt(c.marginTop,10),j=parseInt(c.borderTopWidth,10);h+=i+j,h+=parseInt(c.borderBottomWidth,10),h+=parseInt(c.marginBottom,10);var k=a.clientWidth;k+=parseInt(c.marginRight,10),k+=parseInt(c.borderRightWidth,10);var l=parseInt(c.marginLeft,10),m=parseInt(c.borderLeftWidth,10);return k+=m+l,{left:b.left+window.scrollX-l,top:b.top+window.scrollY-i,outer:{height:h,width:k},inner:{height:a.clientHeight-(d+e),width:a.clientWidth-(g+f)}}},d=!1;DOM.extendDOM({move:function(b,c,e){var f=this[0]?this[0]:this;d=new a(f,b,c,e)}}),DOM.extendEVENT({refresh:function(){if(d){var a=d;if(a.refresh){var b=a.refresh.touch,c=0,e=0;switch(a.way){case"-x":c+=(a.mouse.x-b.x)*a.speed;break;case"x":c-=(a.mouse.x-b.x)*a.speed;break;case"-y":e+=(a.mouse.y-b.y)*a.speed;break;case"y":e-=(a.mouse.y-b.y)*a.speed;break;case"xy":c-=(a.mouse.x-b.x)*a.speed,e-=(a.mouse.y-b.y)*a.speed}a.transform.end={y:e,x:c},a.dom.style.transform="matrix("+a.matrix[0]+","+a.matrix[1]+","+a.matrix[2]+","+a.matrix[3]+", "+c+", "+e+")",a.refresh=!1}}},mousemove:function(a){d&&(d.mouse||(d.mouse=a.touch),d.refresh=a)},mouseup:function(a){d&&e.stopDragAndDrop()}});var e={stopDragAndDrop:function(){d.pos.end={x:parseInt(d.css.left)+d.transform.end.x,y:parseInt(d.css.top)+d.transform.end.y},d.timeEnd=performance.now();var a=window.getComputedStyle(d.dom);d.dom.style.transform="matrix("+d.matrix[0]+","+d.matrix[1]+","+d.matrix[2]+","+d.matrix[3]+",0,0)","absolute"!==a.position&&"fixed"!==a.position&&"relative"!==a.position||("auto"===d.css.top&&(d.css.top=c(d.dom).top),"auto"===d.css.left&&(d.css.left=c(d.dom).left),d.dom.style.top=parseInt(d.css.top)+d.transform.end.y+"px",d.dom.style.left=parseInt(d.css.left)+d.transform.end.x+"px");var b=d.timeEnd-d.timeStart,e=Math.abs(d.transform.end.x),f=Math.abs(d.transform.end.y);d.vitesse={x:1/(1*b/e),y:1/(1*b/f)},d.dom.offsetHeight,d.dom.style.transitionDuration=d.css.transitionDuration,d.dom.style.transitionProperty=d.css.transitionProperty,d.dom.style.transitionDelay=d.css.transitionDelay,d.callback(d),d=!1}}}(),function(){var a="_rX",b="_rY",c="data-touchevent",d={x:window.innerWidth,y:window.innerHeight};DOM.extendDOM({resizeEvent:function(d,e){var f=this[0]?this[0]:this,g=function(a,b){if("function"!=typeof b)throw"callback need to be a function";if(f===document.body||!document.body.contains(f))throw"We can't register a event on a dom not in body";if(!f[c]&&(f[c]={}),f[c][a])throw"Event "+a+" is already defined";f[c][a]=b};switch(d){case"x":g("resizeX",e),f.setAttribute(a,!0);break;case"y":g("resizeY",e),f.setAttribute(b,!0);break;case"xy":g("resizeX",e),f.setAttribute(a,!0),g("resizeY",e),f.setAttribute(b,!0)}}}),DOM.extendEVENT({resize:function(e){var f={x:window.innerWidth,y:window.innerHeight};if(f.x!==d.x){d.x=f.x;for(var g=document.querySelectorAll("["+a+"]"),h=0;h<g.length;h++){var i=g[h];i[c]&&"function"==typeof i[c].resizeX&&i[c].resizeX(e)}}if(f.y!==d.y){d.y=f.y;for(var g=document.querySelectorAll("["+b+"]"),h=0;h<g.length;h++){var i=g[h];i[c]&&"function"==typeof i[c].resizeY&&i[c].resizeY(e)}}}})}(),function(){var a="data-touchevent",b=function(b,c){for(;null!==b;){if(b[a]&&"function"==typeof b[a][c])return b;var b=b.parentNode}return!1};DOM.extendDOM({scrollEvent:function(b,c){var d=this[0]?this[0]:this,e=function(b,c){if("function"!=typeof c)throw"callback need to be a function";if(d===document.body||!document.body.contains(d))throw"We can't register a event on a dom not in body";if(!d[a]&&(d[a]={}),d[a][b])throw"Event "+b+" is already defined";d[a][b]=c};switch(b){case"up":e("scrollUp",c);break;case"down":e("scrollDown",c)}}}),DOM.extendEVENT({mousewheel:function(c){if(c.detail<0)var d="scrollUp";else var d="scrollDown";var e=b(c.target,d);if(e){var f={};f.target=e,f.etat=d,e[a][d](f)}}})}(),function(){var a=!1,b=!1,c="data-touchevent",d={timeLongclick:400,timeDbclick:200,debug:!1},e=!1,f=function(b){this.etat="init",this.target=b.target,this.timeStart=performance.now(),this.mouseStart=b.touch,this.mouseEnd=b.touch,this.mouseStart2=!1,this.mouseEnd2=!1,this.vitesse={x:0,y:0},this.origin=b.target,b.touch2&&(e.etat="multitouch"),a&&clearTimeout(a)},g=function(a){d.debug&&console.log(a)},h=function(a,b){for(;null!==a;){if(a[c]&&"function"==typeof a[c][b])return a;var a=a.parentNode}return!1};DOM.extendDOM({touchevent:function(a,d){var e=this[0]?this[0]:this,f=function(a,b){if("function"!=typeof b)throw"callback need to be a function";if(e===document.body||!document.body.contains(e))throw"We can't register a event on a dom not in body";if(!e[c]&&(e[c]={}),e[c][a])throw"Event "+a+" is already defined";e[c][a]=b};switch(a){default:throw a+"is not a known event try touchX or touchY";case"click":f("click",d);break;case"longclick":f("longclick",d);break;case"longclickup":f("longclickup",d);break;case"touchX":f("touchX",d);break;case"touchY":f("touchY",d);break;case"dbclick":f("dbclick",d);break;case"zoom":f("zoom",d);break;case"DEBUG":b=d}}}),DOM.extendEVENT({click:function(b){if(e)switch(e.etat){case"waitclick":i.stopDbClick();break;case"init":b.touch&&(e.etat="multitouch")}else g("init"),e=new f(b),e.timeout&&clearTimeout(e.timeout),a=setTimeout(function(){i.startLongClick()},d.timeLongclick)},mousemove:function(a){if(e)switch(e.etat){case"init":(Math.abs(a.touch.x-e.mouseStart.x)>4||Math.abs(a.clientY-e.mouseStart.y)>4)&&i.stopFindYourWay(a);break;case"multitouch":e.mouseEnd=a.touch,e.mouseEnd2=a.touch2,e.mouseStart2||(e.mouseStart=a.touch,e.mouseStart2=a.touch2,e.d1=Math.sqrt(Math.pow(e.mouseStart.x-e.mouseStart2.x,2)+Math.pow(e.mouseStart.x-e.mouseStart2.x,2))),a.touch&&a.touch2&&i.startZoom();case"zoom":e.mouseEnd=a.touch,e.mouseEnd2=a.touch2,e.mouseStart2||(e.mouseStart=a.touch,e.mouseStart2=a.touch2,e.d1=Math.sqrt(Math.pow(e.mouseStart.x-e.mouseStart2.x,2)+Math.pow(e.mouseStart.x-e.mouseStart2.x,2))),i.sendZoom()}},mouseup:function(b){if(e)switch(e.etat){default:g("event end by mouseup"),e=!1;break;case"multitouch":e=!1;break;case"waitlongclick":i.stopLongClick();break;case"init":var c=h(e.target,"dbclick");c?(g("waitclick"),e.etat="waitclick",a&&clearTimeout(a),a=setTimeout(function(){"waitclick"===e.etat&&i.stopClick()},d.timeDbclick)):i.stopClick()}}});var i={startZoom:function(){if(e&&"multitouch"===e.etat){var a=h(e.target,"zoom");a&&(e.etat="zoom",e.target=a)}},sendZoom:function(){e&&"zoom"===e.etat&&(e.d2=Math.sqrt(Math.pow(e.mouseEnd.x-e.mouseEnd2.x,2)+Math.pow(e.mouseEnd.x-e.mouseEnd2.x,2)),e.target[c].zoom(e))},startLongClick:function(){if(e&&"init"===e.etat){var a=e.target,b=h(e.target,"longclick");b&&(e.etat="waitlongclick",g("waitlongclick"),a[c].longclick(e),e.target=b)}},stopLongClick:function(){if(!e)throw"stopLongClick is call without event";e.etat="longclick",g("longclick");var a=h(e.target,"longclick");a&&a[c].longclickup(e),e=!1},stopClick:function(){if(e){if("init"===e.etat||"waitclick"===e.etat){e.etat="click",g("click");var a=h(e.target,"click");a&&a[c].click(e)}e=!1}},stopDbClick:function(){if(e&&"waitclick"===e.etat){e.etat="dbclick",g("dbclick");var a=h(e.target,"dbclick");a&&a[c].dbclick(e),e=!1}},stopFindYourWay:function(a){if(e&&"init"===e.etat){if(Math.abs(a.touch.x-e.mouseStart.x)>Math.abs(a.touch.y-e.mouseStart.y)){e.etat="moveX",g("moveX");var b=h(a.target,"touchX");b&&b[c].touchX(e)}else{e.etat="moveY",g("moveY");var b=h(a.target,"touchY");b&&b[c].touchY(e)}e=!1}}}}();
+/**
+ * (c) Gaetan Vigneron 
+ **/
+'use strict';
+var DOM = function () {
+
+    var domExtend = {
+        selection: function(bool){DOM.selection(this,bool)}
+    };
+    var param = {
+        fps: 24,
+    }
+    var events = {
+        mouseup: [],
+        click: [],
+        mousemove: [],
+        mousewheel: [],
+        refresh: [],
+        resize: [],
+    }
+    var parseEvent = function (e) {
+
+        if (e.touches) {
+            var touch = e.touches[0];
+            e.touch = {x: touch.pageX, y: touch.pageY};
+            if (e.touches.length > 1) {
+                var touch = e.touches[1];
+                e.touch2 = {x: touch.pageX, y: touch.pageY};
+            }
+        } else {
+            e.touch = {x: e.clientX, y: e.clientY};
+        }
+    };
+    var EVENT = {
+        refresh: function () {
+            for (var i in events.refresh) {
+                events.refresh[i]();
+            }
+        },
+        click: function (e) {
+            parseEvent(e);
+            for (var i in events.click) {
+                events.click[i](e);
+            }
+            return false;
+        },
+        resize: function (e) {
+            parseEvent(e);
+            for (var i in events.resize) {
+                events.resize[i](e);
+            }
+            return false;
+        },
+        mousemove: function (e) {
+
+            parseEvent(e);
+            for (var i in events.mousemove) {
+                events.mousemove[i](e);
+            }
+        },
+        mousewheel: function (e) {
+            parseEvent(e);
+            for (var i in events.mousewheel) {
+                events.mousewheel[i](e);
+            }
+        },
+        mouseup: function (e) {
+            //parseEvent(e);
+            for (var i in events.mouseup) {
+                events.mouseup[i](e);
+            }
+        }
+    };
+    setInterval(EVENT.refresh, param.fps);
+    window.addEventListener("resize", EVENT.resize);
+    document.addEventListener((/Firefox/i.test(navigator.userAgent)) ? "DOMMouseScroll" : "mousewheel", EVENT.mousewheel);
+    if ('ontouchstart' in window || navigator.maxTouchPoints) {
+        document.addEventListener("touchstart", EVENT.click);
+        document.addEventListener("touchmove", EVENT.mousemove);
+        document.addEventListener("touchend", EVENT.mouseup);
+        document.addEventListener("touchleave", EVENT.mouseup);
+    } else {
+        document.addEventListener("mousedown", EVENT.click);
+        document.addEventListener("mousemove", EVENT.mousemove);
+        document.addEventListener("mouseup", EVENT.mouseup);
+        document.addEventListener('mouseout', function (e) {
+            if (e.toElement === null && e.relatedTarget === null) {
+                EVENT.mouseup(e);
+            }
+        });
+    }
+    var Interface = function (entity) {
+        for (var i in domExtend) {
+            entity[i] = domExtend[i];
+        }
+        return entity;
+    };
+    Interface.extendDOM = function (fngroup) {
+        for (var i in fngroup) {
+            domExtend[i] = fngroup[i];
+        }
+    };
+    Interface.extendEVENT = function (fngroup) {
+        for (var i in fngroup) {
+            switch (i) {
+                default:
+                    throw(i + " is not a known extendEVENT");
+                    break;
+                case "click":
+                    events.click.push(fngroup[i]);
+                    break;
+                case "mouseup":
+                    events.mouseup.push(fngroup[i]);
+                    break;
+                case "mousemove":
+                    events.mousemove.push(fngroup[i]);
+                    break;
+                case "mousewheel":
+                    events.mousewheel.push(fngroup[i]);
+                    break;
+                case "refresh":
+                    events.refresh.push(fngroup[i]);
+                    break;
+                case "resize":
+                    events.resize.push(fngroup[i]);
+                    break;
+            }
+        }
+    };
+    Interface.selection = function (a, boolean) {
+        a = a[0]?a[0]:a;
+        if (!boolean) {
+            a.style.MozUserSelect = "none";
+            a.style.webkitUserSelect = "none";
+            a.style.oUserSelect = "none";
+            a.style.khtmlUserSelect = "none";
+            a.style.msUserSelect = "none";
+            a.style.userSelect = "none";
+        } else {
+            a.style.MozUserSelect = "text";
+            a.style.webkitUserSelect = "text";
+            a.style.oUserSelect = "text";
+            a.style.khtmlUserSelect = "text";
+            a.style.msUserSelect = "text";
+            a.style.userSelect = "text";
+        }
+    };
+    Interface.extend = function (entity) {
+        if (entity === HTMLElement) {
+            for (var i in domExtend) {
+                entity.prototype[i] = domExtend[i];
+            }
+        } else {
+            if (entity.fn && entity.fn.extend) {
+                entity.fn.extend(domExtend);
+            }
+        }
+    }
+    return Interface;
+}();
+
+DOM.register = function () {
+    var refDom = "data-touchevent";
+
+    var find = function (e, eventName) {
+        if (e instanceof HTMLElement === false) {
+                throw("emitEvent need a dom element");
+        }
+        var node = e;
+        while (node !== null || node) {
+            if (node[refDom] && typeof node[refDom][eventName] === 'function') {
+                return node;
+            }
+            node = node.parentNode;
+        }
+        return false;
+    };
+    return {
+        findEvent: function (e, eventName){
+           return find(e, eventName);
+        },
+        emitEvent: function (e, eventName, params) {
+            !params && (params = e);
+            var node = find(e, eventName);
+            if(node){
+                params.target = node;
+                params.etat = eventName;
+                node[refDom][eventName](params);
+                return true;
+            }
+            return false;
+        },
+        setReference: function (e, eventName, callback) {
+            
+            if (typeof callback !== 'function') {
+                throw("callback need to be a function");
+            }
+            if (!(e === document.body ? false : document.body.contains(e))) {
+                throw("We can't register a event on a dom not in body");
+            }
+            
+            !e[refDom] && (e[refDom] = {});
+
+            if (e[refDom][eventName]) {
+                throw("Event " + eventName + " is already defined");
+            }
+
+            e[refDom][eventName] = callback;
+        }
+    }
+}();
+/**
+ *  #move
+ *  @target dom | jQueryDom
+ *  @syntax  dom.move {function}  
+ *  @param way{string} 
+ *         x
+ *         -x
+ *         y
+ *         -y
+ *         xy
+ *  @param speed{integer}        
+ *  @param callback{function} 
+ *  @exemple : dom.move("xy", 1, callback);
+ *  
+ **/
+(function () {
+    'use strict';
+    var PATH = function (dom, way, speed, callback) {
+        var matrix = [1, 0, 0, 1, 0, 0],
+                time = performance.now(),
+                computedStyle = window.getComputedStyle(dom);
+
+        var t = computedStyle.transform;
+        if (t !== "none") {
+            var pos = /\((.*)\)/.exec(t);
+            matrix = pos[1].split(",");
+        }
+        ;
+        this.matrix = matrix;
+        this.timeStart = time;
+        this.timeEnd = time;
+        this.speed = speed;
+        this.dom = dom;
+        this.css = {
+            transitionDuration: computedStyle.transitionDuration,
+            transitionProperty: computedStyle.transitionProperty,
+            transitionDelay: computedStyle.transitionDelay,
+        }
+        dom.style.transition = "none";
+        var transform = getTransform(dom);
+        var x = parseInt(dom.style.left);
+        var y = parseInt(dom.style.top);
+        if (transform.y !== 0 || transform.x !== 0) {
+            dom.offsetHeight; // REFRESH STYLE
+            if (transform.y !== 0) {
+                dom.style.top = y + transform.y + "px";
+            }
+            if (transform.x !== 0) {
+                dom.style.left = x + transform.x + "px";
+            }
+        }
+        this.css.left = computedStyle.left;
+        this.css.top = computedStyle.top;
+        this.transform = {
+            start: {x: 0, y: 0},
+            end: {x: 0, y: 0},
+        }
+        this.pos = {
+            start: {x: x, y: y},
+            end: {x: x, y: y},
+        }
+        this.way = way;
+        this.callback = callback;
+        this.refresh = false;
+    }
+    var  getTransform = function (e) {
+        var computedStyle = window.getComputedStyle(e);
+        var x = 0, y = 0;
+        var t = computedStyle.transform;
+        if (t !== "none") {
+            var re = /\((.*)\)/
+            var pos = re.exec(t);
+            var matrix = pos[1].split(",");
+            x = parseInt(matrix[4]);
+            y = parseInt(matrix[5]);
+        }
+        return  {x: x, y: y};
+    }
+    /********************
+     * TO DO 
+     * ANGLE TRANSFORM
+     * SCALE TRANSFORM
+     ********************/
+    var getOffset = function(e) {
+        var bc = e.getBoundingClientRect();
+        var computedStyle = window.getComputedStyle(e);
+        var paddingTop = parseInt(computedStyle.paddingTop, 10);
+        var paddingBottom = parseInt(computedStyle.paddingBottom, 10);
+        var paddingLeft = parseInt(computedStyle.paddingLeft, 10);
+        var paddingRight = parseInt(computedStyle.paddingRight, 10);
+        var h = e.clientHeight;
+        var marginTop = parseInt(computedStyle.marginTop, 10);
+        var borderTop = parseInt(computedStyle.borderTopWidth, 10)
+        h += marginTop + borderTop;
+        h += parseInt(computedStyle.borderBottomWidth, 10);
+        h += parseInt(computedStyle.marginBottom, 10);
+        var w = e.clientWidth;
+        w += parseInt(computedStyle.marginRight, 10);
+        w += parseInt(computedStyle.borderRightWidth, 10);
+        var marginLeft = parseInt(computedStyle.marginLeft, 10);
+        var borderLeft = parseInt(computedStyle.borderLeftWidth, 10);
+        w += borderLeft + marginLeft;
+        return {
+            left: bc.left + window.scrollX - marginLeft,
+            top: bc.top + window.scrollY - marginTop,
+            outer: {height: h, width: w},
+            inner: {height: e.clientHeight - (paddingTop + paddingBottom), width: e.clientWidth - (paddingRight + paddingLeft)}
+        }
+    }
+    var event = false;
+    DOM.extendDOM(
+            {
+                move: function (way, speed, callback) {
+                    var e = this[0] ? this[0] : this;
+                    event = new PATH(e, way, speed, callback);
+                }
+            }
+    );
+    DOM.extendEVENT({
+        refresh: function () {
+            if (event) {
+                var d = event;
+                if (d.refresh) {
+                    var pos = d.refresh.touch;
+                    var x = 0;//d.transPosStart.x;
+                    var y = 0;//d.transPosStart.y;
+                    switch (d.way) {
+                        case "-x":
+                            x += (d.mouse.x - pos.x) * d.speed;
+                            break;
+                        case "x":
+                            x -= (d.mouse.x - pos.x) * d.speed;
+                            break;
+                        case "-y":
+                            y += (d.mouse.y - pos.y) * d.speed;
+                            break;
+                        case "y":
+                            y -= (d.mouse.y - pos.y) * d.speed;
+                            break;
+                        case "xy":
+                            x -= (d.mouse.x - pos.x) * d.speed;
+                            y -= (d.mouse.y - pos.y) * d.speed;
+                            break;
+                    }
+
+                    d.transform.end = {y: y, x: x};
+                    d.dom.style.transform = "matrix(" + d.matrix[0] + "," + d.matrix[1] + "," + d.matrix[2] + "," + d.matrix[3] + ", " + x + ", " + y + ")";
+                    d.refresh = false;
+                }
+            }
+        },
+        mousemove: function (e) {
+            if (event) {
+                if (!event.mouse) {
+                    event.mouse = e.touch;
+                }
+                event.refresh = e;
+            }
+        },
+        mouseup: function (e) {
+            if (event) {
+                EVENTMOVE.stopDragAndDrop();
+            }
+        }
+    });
+    var EVENTMOVE = {
+        stopDragAndDrop: function () {
+            event.pos.end = {x: parseInt(event.css.left) + event.transform.end.x, y: parseInt(event.css.top) + event.transform.end.y};
+            event.timeEnd = performance.now()
+            var computedStyle = window.getComputedStyle(event.dom);
+            event.dom.style.transform = "matrix(" + event.matrix[0] + "," + event.matrix[1] + "," + event.matrix[2] + "," + event.matrix[3] + ",0,0)";
+            if (computedStyle.position === "absolute" || computedStyle.position === "fixed" || computedStyle.position === "relative") {
+                if (event.css.top === "auto") {
+                    event.css.top = getOffset(event.dom).top;
+                }
+                if (event.css.left === "auto") {
+                    event.css.left = getOffset(event.dom).left;
+                }
+                event.dom.style.top = parseInt(event.css.top) + event.transform.end.y + "px";
+                event.dom.style.left = parseInt(event.css.left) + event.transform.end.x + "px";
+            }
+
+            var time = event.timeEnd - event.timeStart;
+            var x = Math.abs(event.transform.end.x);
+            var y = Math.abs(event.transform.end.y);
+            event.vitesse = {x: 1 / (time * 1 / x), y: 1 / (time * 1 / y)};
+            event.dom.offsetHeight; // REFRESH STYLE
+            event.dom.style.transitionDuration = event.css.transitionDuration;
+            event.dom.style.transitionProperty = event.css.transitionProperty;
+            event.dom.style.transitionDelay = event.css.transitionDelay;
+            event.callback(event);
+            event = false;
+        }
+    };
+})();
+
+       
+(function () {
+    'use strict';
+    
+    var refResizeX = "_rX";
+    var refResizeY = "_rY";
+
+    var memwindow = {x: window.innerWidth, y: window.innerHeight};
+    
+    DOM.extendDOM({
+        resizeEvent: function (eventname, callback) {
+            var e = this[0] ? this[0] : this;
+            switch (eventname) {
+                case "x":
+                    DOM.register.setReference(e, "resizeX", callback);
+                    e.setAttribute(refResizeX, true);
+                    break;
+                case "y":
+                    DOM.register.setReference(e, "resizeY", callback);
+                    e.setAttribute(refResizeY, true);
+                    break;
+                case "xy":
+                    DOM.register.setReference(e, "resizeX", callback);
+                    e.setAttribute(refResizeX, true);
+                    DOM.register.setReference("resizeY", callback);
+                    e.setAttribute(refResizeY, true);
+                    break;
+            }
+        }
+    });
+    DOM.extendEVENT({
+        resize: function (e) {
+            var w = {x: window.innerWidth, y: window.innerHeight};
+            if (w.x !== memwindow.x) {
+                memwindow.x = w.x;
+                var cible = document.querySelectorAll("[" + refResizeX + "]");
+                for (var i = 0; i < cible.length; i++) {
+                    DOM.register.emitEvent(cible[i], "resizeX");
+                }
+            }
+            if (w.y !== memwindow.y) {
+                memwindow.y = w.y;
+                var cible = document.querySelectorAll("[" + refResizeY + "]");
+                for (var i = 0; i < cible.length; i++) {
+                    DOM.register.emitEvent(cible[i], "resizeY");
+                }
+            }
+        }
+    });
+
+})();
+
+(function () {
+    'use strict';
+    DOM.extendDOM({
+        scrollEvent: function (eventname, callback) {
+            var e = this[0] ? this[0] : this;
+            switch (eventname) {
+                case "up":
+                    DOM.register.setReference(e, "scrollUp", callback);
+                    break;
+                case "down":
+                    DOM.register.setReference(e, "scrollDown", callback);
+                    break;
+            }
+        }
+    });
+    DOM.extendEVENT({
+        mousewheel: function (e) {
+            if( e.detail < 0){
+               DOM.register.emitEvent(e.target, "scrollUp");
+            }else{
+               DOM.register.emitEvent(e.target, "scrollDown");
+            }              
+        }
+    });
+
+})();
+
+/**
+ *  #touchevent
+ *  @target dom | jQueryDom
+ *  @syntax  dom.touchevent {function}  
+ *  @param eventname{string} 
+ *       - Same for MOUSE & TOUCH 
+ *         click
+ *         longclick
+ *         longclickup
+ *         touchX
+ *         touchY
+ *         dbclick
+ *         scrollUp
+ *         scrollDown
+ *         zoom
+ *  @param callback{function} 
+ *  @exemple : dom.touchevent('dbclick', dbclick);
+ *
+ **/
+(function () {
+    'use strict';
+    var timeout = false;
+    var DEBUG = false;
+    var refDom = "data-touchevent";
+    var param = {
+        timeLongclick: 400, //@Time to determinate when is a longClick
+        timeDbclick: 200, //@Time to determinate when is a dbclick
+        debug: false,
+    }
+    var event = false;
+    var EVENT = function (e) {
+        this.etat = "init";
+        this.target = e.target;
+        this.timeStart = performance.now()
+        this.mouseStart = e.touch;
+        this.mouseEnd = e.touch;
+        this.mouseStart2 = false;
+        this.mouseEnd2 = false;
+
+        this.vitesse = {x: 0, y: 0};
+        this.origin = e.target;
+
+        e.touch2 && (event.etat = "multitouch");
+        timeout && (clearTimeout(timeout));
+    }
+    var trace = function (value) {
+        param.debug && console.log(value);
+    };
+    /**
+     -------------------------
+     @INIT                   : (touchdown)=> click.etat="init" 
+     -------------------------
+     ETAT::init
+     @INIT                   :  move="whereYouGo"
+     @WAITCLICK              : (touchup)                => click.etat="waitclick"
+     @LONGCLICK              : (time>timeLongclick)     => click.etat="longclick"
+     @MOVEX                  : (touchmove && moveX >4)  => click.etat="moveX"
+     @MOVEY                  : (touchmove && moveY >4)  => click.etat="moveY"
+     @MULTITOUCH             : (e.touch)                => click.etat="multitouch"
+     -------------------------
+     ETAT::waitclick  
+     @INIT                   :  move="waitclick"
+     @DBCLICK                : (time>timeDbclick)       => click.etat="dbclick"
+     @CLICK                  : (not event dbclick)      => click.etat="click"   
+     -------------------------
+     ETAT:multitouch  
+     @ZOOM                   : (e.touch)                => click.etat="zoom"
+     -------------------------
+     ETAT:zoom  
+     @SENDZOOM               :                          => click.etat="zoom"
+     -------------------------
+     ETAT::longclick
+     @INIT                   :  move="longclick"
+     @LONGCLICKUP            : (touchup)                => click.etat="longclickup"
+     -------------------------
+     **/
+    DOM.extendDOM(
+            {
+                touchevent: function (eventname, callback) {
+                    var e = this[0] ? this[0] : this;  
+                    switch (eventname) {
+                        default:
+                            throw(eventname + "is not a known event try touchX or touchY");
+                            break;
+                        case "click":
+                            DOM.register.setReference(e, "click", callback);
+                            break;
+                        case "longclick":
+                            DOM.register.setReference(e, "longclick", callback);
+                            break;
+                        case "longclickup":
+                            DOM.register.setReference(e, "longclickup", callback);
+                            break;
+                        case "touchX":
+                            DOM.register.setReference(e, "touchX", callback);
+                            break;
+                        case "touchY":
+                            DOM.register.setReference(e, "touchY", callback);
+                            break;
+                        case "dbclick":
+                            DOM.register.setReference(e, "dbclick", callback);
+                            break;
+                        case "zoom":
+                            DOM.register.setReference(e, "zoom", callback);
+                            break;
+                        case "DEBUG":
+                            DEBUG = callback;
+                            break;
+                    }
+                }
+            }
+    );
+    DOM.extendEVENT({
+        click: function (e) {
+            if (!event) {
+                trace("init");
+                event = new EVENT(e);
+                if (event.timeout) {
+                    clearTimeout(event.timeout);
+                }
+                timeout = setTimeout(function () {
+                    EVENTTOUCH.startLongClick();
+                }, param.timeLongclick);
+            } else {
+                switch (event.etat) {
+                    case "waitclick":
+                        EVENTTOUCH.stopDbClick();
+                        break;
+                    case "init":
+                        e.touch && (event.etat = "multitouch");
+                        break;
+                }
+            }
+        },
+        mousemove: function (e) {
+            if (event) {
+                switch (event.etat) {
+                    case "init":
+                        if (Math.abs(e.touch.x - event.mouseStart.x) > 4 || Math.abs(e.clientY - event.mouseStart.y) > 4) {
+                            EVENTTOUCH.stopFindYourWay(e);
+                        }
+                        break;
+                    case "multitouch":
+                        event.mouseEnd = e.touch;
+                        event.mouseEnd2 = e.touch2;
+                        if (!event.mouseStart2) {
+                            event.mouseStart = e.touch;
+                            event.mouseStart2 = e.touch2;
+                            event.d1 = Math.sqrt(Math.pow(event.mouseStart.x - event.mouseStart2.x, 2) + Math.pow(event.mouseStart.x - event.mouseStart2.x, 2));
+                        }
+                        e.touch && (e.touch2 && EVENTTOUCH.startZoom());
+                    case "zoom":
+                        event.mouseEnd = e.touch;
+                        event.mouseEnd2 = e.touch2;
+                        if (!event.mouseStart2) {
+                            event.mouseStart = e.touch;
+                            event.mouseStart2 = e.touch2;
+                            event.d1 = Math.sqrt(Math.pow(event.mouseStart.x - event.mouseStart2.x, 2) + Math.pow(event.mouseStart.x - event.mouseStart2.x, 2));
+                        }
+                        EVENTTOUCH.sendZoom();
+                        break;
+                }
+            }
+        },
+        mouseup: function (e) {
+            if (event) {
+                switch (event.etat) {
+                    default:
+                        trace("event end by mouseup");
+                        event = false;
+                        break;
+                    case "multitouch":
+                        event = false;
+                        break;
+                    case "waitlongclick":
+                        EVENTTOUCH.stopLongClick();
+                        break;
+                    case "init":
+                        var parent = DOM.register.findEvent(event.target, "dbclick");
+                        
+                        if (parent) {
+                            trace("waitclick");
+                            event.etat = "waitclick";
+                            event.traget = parent;
+                            if (timeout) {
+                                clearTimeout(timeout);
+                            }
+                            timeout = setTimeout(function () {
+                                if (event.etat === "waitclick") {
+                                    EVENTTOUCH.stopClick();
+                                }
+                            }, param.timeDbclick);
+                        } else {
+                            EVENTTOUCH.stopClick();
+                        }
+                        break;
+                }
+            }
+        }
+    });
+    var EVENTTOUCH = {
+        startZoom: function () {
+            if (event && event.etat === "multitouch") {
+                DOM.register.emitEvent(event.target, "zoom",event);
+            }
+        },
+        sendZoom: function () {
+            if (event && event.etat === "zoom") {
+                event.d2 = Math.sqrt(Math.pow(event.mouseEnd.x - event.mouseEnd2.x, 2) + Math.pow(event.mouseEnd.x - event.mouseEnd2.x, 2));
+                DOM.register.emitEvent(event.target, "zoom",event);
+            }
+        },
+        /***
+         * @ASYNCH
+         **/
+        startLongClick: function () {
+            if (event) {
+                if (event.etat === "init") {
+                    var parent = DOM.register.findEvent(event.target,"longclick",event);
+                    if(parent){
+                         DOM.register.emitEvent(event.target,"longclick",event);
+                         event.target = parent;
+                         trace("waitlongclick");
+                         event.etat = "waitlongclick";
+                    };
+                }
+            }
+        },
+        stopLongClick: function () {
+            if (event) {
+                event.etat = "longclick";
+                trace("longclick");
+                DOM.register.emitEvent(event.target, "longclickup",event);
+                event = false;
+            } else {
+                throw("stopLongClick is call without event");
+            }
+        },
+        /**
+         * @ASYNCH
+         **/
+        stopClick: function () {
+            if (event) {
+                if (event.etat === "init" || event.etat === "waitclick") {
+                    event.etat = "click"
+                    trace("click");
+                    DOM.register.emitEvent(event.target, "click",event);
+                }
+                event = false;
+            }
+        },
+        /**
+         * @ASYNCH
+         **/
+        stopDbClick: function () {
+            if (event) {
+                if (event.etat === "waitclick") {
+                    event.etat = "dbclick"
+                    trace("dbclick");
+                    DOM.register.emitEvent(event.target, "dbclick",event);
+                    event = false;
+                }
+            }
+        },
+        stopFindYourWay: function (e) {
+            if (event) {
+                if (event.etat === "init") {
+                    if (Math.abs(e.touch.x - event.mouseStart.x) > Math.abs(e.touch.y - event.mouseStart.y)) {
+                        event.etat = "moveX";
+                        trace("moveX");
+                        DOM.register.emitEvent(event.target, "touchX",event);
+                    } else {
+                        event.etat = "moveY";
+                        trace("moveY");
+                        DOM.register.emitEvent(event.target, "touchY",event);
+                    }
+                    event = false;
+                }
+            }
+        }
+    }
+})();

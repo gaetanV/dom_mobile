@@ -3,19 +3,19 @@ module.exports = function(grunt) {
   grunt.initConfig({
     concat: {
         dest:{
-             src: ['lib/DOM.js','lib/**/*.js'],
+             src: ['lib/DOM.js','lib/DOM_register.js','lib/**/*.js'],
              dest: "app/lib/DOM.js",
         }
     },
     uglify: {
         dest:{
-             src: ['lib/DOM.js','lib/**/*.js'],
+             src: ['lib/DOM.js','lib/DOM_register','lib/**/*.js'],
              dest: "app/lib/DOM.js",
         }
     },
     watch: {
       files: ['lib/**/*.js'],
-      tasks: ['uglify']
+      tasks: ['concat']
     }
   });
   grunt.loadNpmTasks('grunt-contrib-concat');

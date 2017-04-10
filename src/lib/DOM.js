@@ -1,9 +1,5 @@
-
 /**
- *  lib/DOM.js
- *  
- * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
- *  
+ * (c) Gaetan Vigneron 
  **/
 'use strict';
 var DOM = function () {
