@@ -1,2 +1,2 @@
 /node_modules/*
-/src/app/lib/DOM.js
+package-lock.json

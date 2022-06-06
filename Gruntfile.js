@@ -1,25 +1,38 @@
 module.exports = function(grunt) {
 
   grunt.initConfig({
+
     concat: {
-        dest:{
-             src: ['src/lib/DOM.js','src/lib/DOM_register.js','src/lib/**/*.js'],
-             dest: "src/app/lib/DOM.js",
-        }
+      basic: {
+        src: ['src/lib/DOM.js','src/lib/DOM_register.js','src/lib/**/*.js'],
+        dest: 'src/app/lib/DOM.js',
+      },
+      export: {
+        src: ['src/lib/DOM.js','src/lib/DOM_register.js','src/lib/**/*.js','src/export.js'],
+        dest: 'src/app/lib/DOM.export.js',
+      },
     },
-    uglify: {
-        dest:{
-             src: ['src/lib/DOM.js','src/lib/DOM_register','src/lib/**/*.js'],
-             dest: "src/app/lib/DOM.js",
-        }
+
+    terser: {
+      basic: {
+        src: ['src/lib/DOM.js','src/lib/DOM_register.js','src/lib/**/*.js'],
+        dest: 'src/app/lib/DOM.js',
+      },
+      export: {
+        src: ['src/lib/DOM.js','src/lib/DOM_register.js','src/lib/**/*.js','src/export.js'],
+        dest: 'src/app/lib/DOM.export.js',
+      },
     },
+
     watch: {
       files: ['src/lib/**/*.js'],
-      tasks: ['concat']
-    }
+      tasks: ['concat:basic']
+    },
+
   });
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-terser');
   grunt.registerTask('default', ['watch']);
 };
