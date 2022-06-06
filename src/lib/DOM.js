@@ -79,16 +79,17 @@ var DOM = function () {
         document.addEventListener("touchmove", EVENT.mousemove);
         document.addEventListener("touchend", EVENT.mouseup);
         document.addEventListener("touchleave", EVENT.mouseup);
-    } else {
-        document.addEventListener("mousedown", EVENT.click);
-        document.addEventListener("mousemove", EVENT.mousemove);
-        document.addEventListener("mouseup", EVENT.mouseup);
-        document.addEventListener('mouseout', function (e) {
-            if (e.toElement === null && e.relatedTarget === null) {
-                EVENT.mouseup(e);
-            }
-        });
-    }
+    } 
+
+    document.addEventListener("mousedown", EVENT.click);
+    document.addEventListener("mousemove", EVENT.mousemove);
+    document.addEventListener("mouseup", EVENT.mouseup);
+    document.addEventListener('mouseout', function (e) {
+        if (e.toElement === null && e.relatedTarget === null) {
+            EVENT.mouseup(e);
+        }
+    });
+  
     var Interface = function (entity) {
         for (var i in domExtend) {
             entity[i] = domExtend[i];

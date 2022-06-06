@@ -1,7 +1,6 @@
 {
   "name": "domMobile",
-  "version": "0.3.0",
-  "main": "parse.js",
+  "version": "0.3.1",
   "dependencies": {
     "grunt": "~0.4.5",
     "grunt-contrib-uglify": "~0.5.0",

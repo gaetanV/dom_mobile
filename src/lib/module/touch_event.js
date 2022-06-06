@@ -35,8 +35,9 @@
 
         this.vitesse = {x: 0, y: 0};
         this.origin = e.target;
-
-        e.touch2 && (event.etat = "multitouch");
+        if(event && e.touch2) {
+            event.etat = "multitouch";
+        }
         timeout && (clearTimeout(timeout));
     }
     var trace = function (value) {
